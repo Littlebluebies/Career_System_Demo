@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Demo · ระบบแนะนำอาชีพและวิเคราะห์ช่องว่างทักษะ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Kanit:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F5F1;--surface:#FFFEFB;--surface2:#F0EEE8;--line:#E2DED5;--line2:#CFCAC0;
+  --text:#1F2A44;--muted:#5D6375;--faint:#8A8E99;
+  --pri:#1F2A44;--on-pri:#FFFFFF;
+  --accent:#B5521F;--accent-soft:#F8E6DA;
+  --blue:#2E6FB0;--blue-soft:#E6EEF7;
+  --green:#2E7D52;--green-soft:#E3F0E8;
+  --danger:#B3261E;--danger-soft:#FBE7E5;
+  --scrim:rgba(20,26,40,.45);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141A28;--surface:#1C2436;--surface2:#242E44;--line:#334059;--line2:#45536F;
+    --text:#E8EAF0;--muted:#AEB5C4;--faint:#7F879A;
+    --pri:#E6EBF5;--on-pri:#141A28;
+    --accent:#EBA374;--accent-soft:#3B2A20;
+    --blue:#86B6EA;--blue-soft:#1E2F46;
+    --green:#7FC79F;--green-soft:#1D3428;
+    --danger:#F28B82;--danger-soft:#3B2224;
+    --scrim:rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141A28;--surface:#1C2436;--surface2:#242E44;--line:#334059;--line2:#45536F;
+  --text:#E8EAF0;--muted:#AEB5C4;--faint:#7F879A;
+  --pri:#E6EBF5;--on-pri:#141A28;
+  --accent:#EBA374;--accent-soft:#3B2A20;
+  --blue:#86B6EA;--blue-soft:#1E2F46;
+  --green:#7FC79F;--green-soft:#1D3428;
+  --danger:#F28B82;--danger-soft:#3B2224;
+  --scrim:rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;font-size:16px;line-height:1.6}
+h1,h2,h3{font-family:'Kanit','IBM Plex Sans Thai',system-ui,sans-serif;font-weight:500;line-height:1.3;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--text)}
+a{color:var(--blue)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+
+.demo{background:var(--accent-soft);color:var(--text);font-size:14px}
+.demo .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.demo b{color:var(--accent);font-weight:600}
+.demo .acts{display:flex;gap:8px;flex-wrap:wrap}
+.mini{border:1px solid var(--line2);background:var(--surface);border-radius:8px;padding:4px 12px;font-size:13.5px}
+.mini:hover{border-color:var(--text)}
+a.mini{text-decoration:none;color:var(--text);display:inline-flex;align-items:center}
+.mini.sw{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
+
+.nav{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--surface)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;text-align:left}
+.mark{width:34px;height:34px;border-radius:9px;background:var(--pri);color:var(--on-pri);display:grid;place-items:center;font-family:Kanit,sans-serif;font-size:17px}
+.brand span{font-weight:600;font-size:15px;line-height:1.25}
+.brand small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
+.menu{display:flex;gap:4px}
+.menu button{background:none;border:0;padding:8px 12px;border-radius:8px;color:var(--muted);font-size:15px}
+.menu button.on{color:var(--text);font-weight:600;background:var(--surface2)}
+.menu button:disabled{opacity:.4;cursor:not-allowed}
+
+main{padding:32px 0 64px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 22px;border-radius:10px;font-weight:600;font-size:15.5px;border:1.5px solid transparent;white-space:nowrap}
+.btn.pri{background:var(--pri);color:var(--on-pri)}
+.btn.pri:hover{opacity:.9}
+.btn.sec{background:var(--surface);border-color:var(--line2);color:var(--text)}
+.btn.sec:hover{border-color:var(--text)}
+.btn.ghost{background:none;border:0;color:var(--blue);padding:0 4px;min-height:auto}
+.btn:focus-visible,.chip:focus-visible,.menu button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.rate button:focus-visible,.card-btn:focus-visible{outline:2.5px solid var(--blue);outline-offset:2px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.pad{padding:22px 24px}
+.kicker{font-size:14px;font-weight:600;color:var(--accent);margin-bottom:6px}
+.sub{color:var(--muted)}
+.small{font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.between{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.mt8{margin-top:8px}.mt16{margin-top:16px}.mt24{margin-top:24px}.mt32{margin-top:32px}
+
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+.hero h1{font-size:46px;font-weight:600}
+.hero p{font-size:18px;color:var(--muted);max-width:540px}
+.steps3{counter-reset:s}
+.step3{padding:18px 20px}
+.step3 h3{font-size:19px}
+.step3 .n{font-family:Kanit,sans-serif;color:var(--accent);font-size:15px}
+.preview{padding:20px}
+.pv-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)}
+.pv-row:last-child{border-bottom:0}
+.pv-bar{height:8px;border-radius:4px;background:var(--surface2);margin-top:6px;overflow:hidden}
+.pv-bar i{display:block;height:100%;background:var(--pri);border-radius:4px}
+
+.field{margin-top:18px}
+.label{display:block;font-weight:600;font-size:15px;margin-bottom:8px}
+.hint{font-size:13.5px;color:var(--faint);font-weight:400}
+.input,select.input,textarea.input{width:100%;min-height:46px;border:1.5px solid var(--line2);background:var(--surface);border-radius:10px;padding:10px 14px}
+textarea.input{min-height:110px;resize:vertical;line-height:1.55}
+.input.err{border-color:var(--danger)}
+.errtxt{color:var(--danger);font-size:13.5px;margin-top:6px}
+.radio{display:flex;gap:10px;flex-wrap:wrap}
+.radio label{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line2);border-radius:10px;padding:9px 16px;cursor:pointer;background:var(--surface)}
+.radio input{accent-color:var(--pri)}
+.radio label:has(input:checked){border-color:var(--pri);background:var(--surface2);font-weight:600}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:4px 14px;border-radius:18px;border:1.5px solid var(--line2);background:var(--surface);font-size:14.5px;line-height:1.3;text-align:left}
+.chip.on{background:var(--pri);border-color:var(--pri);color:var(--on-pri)}
+.chip .x{opacity:.7;font-size:16px;line-height:1}
+.chip.static{cursor:default}
+.chip.soft{background:var(--surface2);border-color:transparent}
+
+.stepper{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:26px}
+.stepper button{background:none;border:0;padding:0;text-align:left;color:var(--faint);font-size:13.5px}
+.stepper button::before{content:"";display:block;height:6px;border-radius:3px;background:var(--line);margin-bottom:7px}
+.stepper button.done::before,.stepper button.on::before{background:var(--pri)}
+.stepper button.on{color:var(--text);font-weight:600}
+.stepper button.done{color:var(--muted)}
+.stepper button:disabled{cursor:default}
+.formfoot{display:flex;justify-content:space-between;gap:12px;margin-top:30px;flex-wrap:wrap}
+.formfoot .r{display:flex;gap:10px;flex-wrap:wrap}
+.info{background:var(--surface2);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--muted)}
+.info b{color:var(--text)}
+
+.picker{position:relative}
+.dd{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--line2);border-radius:12px;z-index:10;max-height:280px;overflow:auto;padding:6px}
+.dd button{display:flex;width:100%;justify-content:space-between;gap:12px;background:none;border:0;padding:9px 12px;border-radius:8px;text-align:left}
+.dd button:hover,.dd button.act{background:var(--surface2)}
+.dd .via{font-size:12.5px;color:var(--blue)}
+.dd .empty{padding:10px 12px;color:var(--faint);font-size:14px}
+
+.proj{padding:18px 20px;margin-top:14px}
+.sugg{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+.sugg:first-of-type{border-top:0}
+.sugg input{width:20px;height:20px;margin-top:3px;accent-color:var(--pri);flex:none}
+.sugg .src{font-size:13.5px;color:var(--muted)}
+.sugg mark{background:var(--accent-soft);color:var(--text);border-radius:3px;padding:0 2px}
+
+.tabs{display:flex;gap:4px;border-bottom:1.5px solid var(--line);margin:18px 0 22px;overflow-x:auto}
+.tabs button{background:none;border:0;padding:10px 16px;color:var(--muted);font-size:15.5px;border-bottom:3px solid transparent;margin-bottom:-1.5px;white-space:nowrap}
+.tabs button.on{color:var(--text);font-weight:600;border-bottom-color:var(--pri)}
+
+.rank{position:relative;padding:20px 22px;text-align:left;width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:14px}
+.rank.sel{border-color:var(--pri);border-width:2.5px;padding:19px 21px}
+.rank .r{font-size:14px;color:var(--muted)}
+.rank .nm{font-weight:600;font-size:17px;line-height:1.35;margin-top:2px;min-height:46px}
+.rank .th{font-size:13.5px;color:var(--muted)}
+.rank .pct{font-family:Kanit,sans-serif;font-size:44px;font-weight:600;line-height:1.1;margin-top:8px}
+.bar{height:9px;border-radius:5px;background:var(--surface2);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--pri);border-radius:5px;transition:width .6s ease}
+.tag{display:inline-block;font-size:12.5px;font-weight:600;border-radius:10px;padding:1px 10px;background:var(--blue-soft);color:var(--blue)}
+.tag.out{background:var(--accent-soft);color:var(--accent)}
+.allrow{display:grid;grid-template-columns:minmax(150px,280px) 1fr 52px;gap:14px;align-items:center;padding:7px 0;font-size:14.5px}
+.allrow .bar{margin-top:0}
+
+.seg{display:inline-flex;border:1.5px solid var(--line2);border-radius:10px;overflow:hidden}
+.seg button{background:var(--surface);border:0;padding:7px 16px;font-size:14.5px}
+.seg button.on{background:var(--pri);color:var(--on-pri);font-weight:600}
+.gapgrid{display:grid;grid-template-columns:1fr 1.25fr;gap:20px}
+.have li,.miss li{list-style:none}
+.have ul,.miss ul{margin:0;padding:0}
+.have li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+.have li span:first-child::before{content:"✓";color:var(--green);font-weight:700;margin-right:10px}
+.miss{border-style:dashed;border-color:var(--line2)}
+.miss li{padding:11px 0;border-bottom:1px solid var(--line)}
+.miss li:last-child,.have li:last-child{border-bottom:0}
+.miss .top{display:flex;justify-content:space-between;gap:10px;font-size:15px}
+.miss .tip{font-size:13.5px;color:var(--muted);margin-top:4px}
+.miss .bar i{background:var(--accent)}
+.empty-note{color:var(--faint);font-size:14.5px;padding:8px 0}
+.pfrow{display:grid;grid-template-columns:132px 1fr;gap:14px;align-items:start;padding:12px 0;border-top:1px solid var(--line)}
+.pfrow:first-child{border-top:0}
+.pfk{font-size:12.5px;font-weight:600;border-radius:10px;padding:2px 10px;text-align:center;margin-top:2px}
+.pfk.good{background:var(--green-soft);color:var(--green)}.pfk.mid{background:var(--blue-soft);color:var(--blue)}.pfk.low{background:var(--surface2);color:var(--muted)}
+@media (max-width:520px){.pfrow{grid-template-columns:1fr;gap:6px}.pfk{justify-self:start}}
+
+.qsec h3{font-size:19px}
+.q{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.q.err .qt{color:var(--danger)}
+.rate{display:flex;gap:6px}
+.rate button{width:42px;height:42px;border-radius:9px;border:1.5px solid var(--line2);background:var(--surface);font-weight:600}
+.rate button.on{background:var(--pri);border-color:var(--pri);color:var(--on-pri)}
+.scale{font-size:13.5px;color:var(--faint)}
+
+.done-wrap{text-align:center;max-width:560px;margin:40px auto 0}
+.ok{width:92px;height:92px;border-radius:50%;border:3px solid var(--green);display:grid;place-items:center;margin:0 auto;color:var(--green);font-size:46px}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface2);padding:2px 10px;border-radius:6px}
+
+.modal-bg{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal{background:var(--surface);border-radius:16px;max-width:460px;width:100%;padding:26px 28px;border:1px solid var(--line)}
+.modal.wide{max-width:760px;max-height:calc(100vh - 40px);overflow:auto}
+.modal h2{font-size:24px}
+.modal .ic{width:52px;height:52px;border-radius:50%;border:2.5px solid var(--danger);color:var(--danger);display:grid;place-items:center;font-weight:700;font-size:26px;margin-bottom:12px}
+.modal ul{margin:10px 0 0;padding-left:20px;color:var(--muted)}
+.modal .acts{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;flex-wrap:wrap}
+
+#resume{background:#fff;color:#1F2A44;border:1px solid #E2DED5;border-radius:10px;padding:28px 32px;margin-top:16px}
+#resume h2{font-size:26px;color:#1F2A44}
+#resume h4{font-family:Kanit,sans-serif;font-weight:500;font-size:16px;margin:18px 0 6px;color:#B5521F}
+#resume p,#resume li{font-size:14px;color:#333;margin:2px 0}
+#resume .rs{display:flex;flex-wrap:wrap;gap:6px}
+#resume .rs span{border:1px solid #CFCAC0;border-radius:12px;padding:1px 10px;font-size:13px;color:#1F2A44}
+
+.fade{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}.bar i{transition:none}}
+
+@media (max-width:860px){
+  .hero,.grid2,.gapgrid{grid-template-columns:1fr}
+  .grid3{grid-template-columns:1fr}
+  .hero h1{font-size:34px}
+  .menu{display:none}
+  .brand small{display:none}
+  .stepper{grid-template-columns:repeat(5,1fr);gap:6px}
+  .stepper button{font-size:0}
+  .stepper button.on{font-size:12.5px}
+  .q{grid-template-columns:1fr}
+  .allrow{grid-template-columns:1fr 46px}
+  .allrow .bar{grid-column:1/-1;grid-row:2}
+  .wrap{padding:0 16px}
+}
+@media print{
+  body *{visibility:hidden}
+  #resume,#resume *{visibility:visible}
+  #resume{position:absolute;left:0;top:0;width:100%;border:0}
+  .modal-bg{background:none}
+}
+</style>
+</head>
+<body>
+<div class="demo"><div class="wrap">
+  <div><b>โหมดสาธิต</b> · ผลลัพธ์คำนวณจากข้อมูลจำลองในหน้าเว็บ ยังไม่ใช่แบบจำลองที่สอนจากประกาศงานจริง</div>
+  <div class="acts"><button class="mini" data-act="autofill">กรอกตัวอย่างอัตโนมัติ</button><button class="mini" data-act="reset">เริ่มใหม่</button><a class="mini sw" data-link="res" href="researcher.html">ไปฝั่งผู้วิจัย →</a></div>
+</div></div>
+<nav class="nav"><div class="wrap">
+  <button class="brand" data-go="home" aria-label="ไปหน้าแรก"><div class="mark">C</div><span>ระบบแนะนำอาชีพ<small>และวิเคราะห์ช่องว่างทักษะ · สื่อสารมวลชน</small></span></button>
+  <div class="menu" id="menu"></div>
+</div></nav>
+<main><div class="wrap" id="app"></div></main>
+<div id="modal-root"></div>
+
+<script>
+/* ---------- cross-site links + shared demo store ---------- */
+const ON_ARTIFACT = /claudeusercontent|claude\.ai|claude\.site/.test(location.hostname);
+const LINKS = ON_ARTIFACT
+  ? {res:'https://claude.ai/artifact/Xx3VjTMGjfb323w4MJHTpt', stu:'https://claude.ai/artifact/4FNy7fhFaLTFovg23APinc'}
+  : {res:'researcher.html', stu:'index.html'};
+const STORE_KEY = 'career-demo-responses';
+function fixLinks(root=document){ root.querySelectorAll('[data-link]').forEach(a=>{ a.href = LINKS[a.dataset.link]; if(ON_ARTIFACT){ a.target='_blank'; a.rel='noopener'; } }); }
+function saveResponse(rec){ try{ const arr = JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); arr.push(rec); localStorage.setItem(STORE_KEY, JSON.stringify(arr)); return true; }catch(e){ return false; } }
+const PROG = {FTP:'เทคโนโลยีการผลิตภาพยนตร์และวิทยุโทรทัศน์',AP:'เทคโนโลยีการโฆษณาและประชาสัมพันธ์',PT:'เทคโนโลยีการพิมพ์ดิจิทัลและบรรจุภัณฑ์',WEB:'ครีเอทีฟมีเดียเทคโนโลยี (เว็บไซต์ฟูลสแต็ก)',GAME:'ครีเอทีฟมีเดียเทคโนโลยี (เกมดิจิทัล)'};
+const progGroup = c => (c==='WEB'||c==='GAME') ? 'CMT' : c;
+
+const SK = [
+ ['Adobe Premiere Pro','h',['premiere','premiere pro','พรีเมียร์']],
+ ['Final Cut Pro','h',['final cut','fcp']],
+ ['DaVinci Resolve','h',['davinci','resolve']],
+ ['ตัดต่อวิดีโอ','h',['ตัดต่อ','ตัดคลิป','video editing','edit วิดีโอ']],
+ ['ถ่ายวิดีโอ','h',['ถ่ายวิดีโอ','ถ่ายคลิป','videography','ถ่ายทำ']],
+ ['ถ่ายภาพ','h',['ถ่ายรูป','photography','ช่างภาพ']],
+ ['การจัดแสง','h',['จัดแสง','lighting']],
+ ['เขียนบท','h',['เขียนบท','script','สคริปต์']],
+ ['Adobe After Effects','h',['after effects','ae']],
+ ['Motion Graphics','h',['motion graphic','โมชันกราฟิก','โมชั่นกราฟิก']],
+ ['Color Grading','h',['แก้สี','เกรดสี','color grade']],
+ ['Sound Design','h',['ตัดต่อเสียง','มิกซ์เสียง','บันทึกเสียง','sound design']],
+ ['Adobe Audition','h',['audition']],
+ ['Pro Tools','h',['protools']],
+ ['Copywriting','h',['copywrite','copywriter','เขียนแคปชัน','เขียนแคปชั่น','คำโฆษณา','บทโฆษณา']],
+ ['วางแผนสื่อ','h',['media plan','media planning','แผนสื่อ']],
+ ['Content Writing','h',['เขียนคอนเทนต์','เขียนบทความ','content writing','คอนเทนต์']],
+ ['Social Media Marketing','h',['social media','โซเชียลมีเดีย','tiktok','facebook','instagram','ดูแลเพจ']],
+ ['SEO','h',['seo','search engine optimization']],
+ ['Google Analytics','h',['google analytics','ga4']],
+ ['Meta Ads','h',['facebook ads','ยิงแอด','meta ads','ลงโฆษณาออนไลน์']],
+ ['วิเคราะห์ข้อมูลการตลาด','h',['วิเคราะห์ยอด','insight','วิเคราะห์ข้อมูลการตลาด','marketing analytics']],
+ ['ประชาสัมพันธ์','h',['ข่าวประชาสัมพันธ์','press release','งานประชาสัมพันธ์']],
+ ['จัดอีเวนต์','h',['อีเวนต์','event','จัดงาน']],
+ ['Brand Strategy','h',['branding','brand strategy','สร้างแบรนด์']],
+ ['Adobe Photoshop','h',['photoshop','ps','โฟโต้ชอป']],
+ ['Adobe Illustrator','h',['illustrator','อิลลัสเตรเตอร์']],
+ ['Adobe InDesign','h',['indesign']],
+ ['Canva','h',['canva']],
+ ['Typography','h',['typography','ตัวอักษร','ฟอนต์']],
+ ['จัดวางเลย์เอาต์','h',['layout','เลย์เอาต์','จัดหน้า']],
+ ['ออกแบบบรรจุภัณฑ์','h',['บรรจุภัณฑ์','packaging','กล่องสินค้า']],
+ ['Dieline','h',['dieline','ไดคัท','die-cut']],
+ ['เตรียมไฟล์ก่อนพิมพ์','h',['prepress','เตรียมไฟล์','ไฟล์งานพิมพ์']],
+ ['การจัดการสี','h',['cmyk','color management','โปรไฟล์สี']],
+ ['ESKO ArtiosCAD','h',['artioscad','esko']],
+ ['ควบคุมคุณภาพงานพิมพ์','h',['ตรวจงานพิมพ์','qc งานพิมพ์','print qc']],
+ ['HTML','h',['html']],
+ ['CSS','h',['css','tailwind']],
+ ['JavaScript','h',['js','javascript','จาวาสคริปต์']],
+ ['React','h',['react','reactjs','next.js']],
+ ['Node.js','h',['node','nodejs','express']],
+ ['SQL','h',['sql','mysql','ฐานข้อมูล','database']],
+ ['Git','h',['git','github']],
+ ['Figma','h',['figma','ฟิกม่า']],
+ ['UX Research','h',['ux research','user research','สัมภาษณ์ผู้ใช้','usability']],
+ ['Wireframe & Prototype','h',['wireframe','prototype','ต้นแบบ']],
+ ['UI Design','h',['ui','ui design','ออกแบบหน้าจอ']],
+ ['WordPress','h',['wordpress','wp']],
+ ['Responsive Design','h',['responsive']],
+ ['Unity','h',['unity']],
+ ['Unreal Engine','h',['unreal','ue5']],
+ ['C#','h',['c#','csharp']],
+ ['C++','h',['c++','cpp']],
+ ['Game Design','h',['game design','ออกแบบเกม','level design','ออกแบบด่าน']],
+ ['Game Testing','h',['ทดสอบเกม','game test','qa เกม','game tester']],
+ ['Blender','h',['blender']],
+ ['Autodesk Maya','h',['maya']],
+ ['3D Modeling','h',['3d model','ปั้นโมเดล','โมเดล 3 มิติ','3d']],
+ ['Concept Art','h',['concept art','วาดภาพประกอบ','illustration','วาดคาแรกเตอร์']],
+ ['Animation','h',['animation','แอนิเมชัน','อนิเมชั่น']],
+ ['ทำงานเป็นทีม','s',['ทีม','teamwork','ทำงานกลุ่ม']],
+ ['การสื่อสาร','s',['สื่อสาร','communication','ประสานงาน']],
+ ['ความคิดสร้างสรรค์','s',['สร้างสรรค์','creative','ไอเดีย']],
+ ['การแก้ปัญหา','s',['แก้ปัญหา','problem solving']],
+ ['การบริหารเวลา','s',['บริหารเวลา','deadline','ทันกำหนด']],
+ ['ภาวะผู้นำ','s',['หัวหน้าทีม','ผู้นำ','leader']],
+ ['การคิดวิเคราะห์','s',['วิเคราะห์','analytical']],
+ ['ความใส่ใจในรายละเอียด','s',['ละเอียด','รายละเอียด','detail']],
+ ['การนำเสนอ','s',['นำเสนอ','pitch','present']],
+ ['การปรับตัว','s',['ปรับตัว','adapt']]
+].map(([n,t,a])=>({n,t,a}));
+const SKMAP = Object.fromEntries(SK.map(s=>[s.n,s]));
+const HARD = SK.filter(s=>s.t==='h'), SOFT = SK.filter(s=>s.t==='s');
+
+const CF = [
+ {id:'CF01',n:'Film & Video Production',th:'งานถ่ายทำวิดีโอและภาพยนตร์',c:'FTP',pos:'Camera Operator, Director/Producer',s:{'ถ่ายวิดีโอ':82,'การจัดแสง':60,'ถ่ายภาพ':55,'ตัดต่อวิดีโอ':50,'เขียนบท':48,'Adobe Premiere Pro':45,'ทำงานเป็นทีม':70,'ความคิดสร้างสรรค์':60,'การสื่อสาร':55,'การบริหารเวลา':40}},
+ {id:'CF02',n:'Post-Production & Motion/VFX',th:'งานตัดต่อและโมชันกราฟิก',c:'FTP',pos:'Video Editor, Motion Graphic Designer',s:{'ตัดต่อวิดีโอ':88,'Adobe Premiere Pro':76,'Adobe After Effects':70,'Motion Graphics':62,'Color Grading':45,'DaVinci Resolve':40,'Final Cut Pro':22,'ความคิดสร้างสรรค์':60,'ความใส่ใจในรายละเอียด':58,'การบริหารเวลา':52}},
+ {id:'CF03',n:'Broadcast & Audio',th:'งานเสียงและการออกอากาศ',c:'FTP',pos:'Sound Engineer',s:{'Sound Design':80,'Adobe Audition':55,'Pro Tools':40,'ตัดต่อวิดีโอ':30,'ทำงานเป็นทีม':55,'ความใส่ใจในรายละเอียด':50,'การแก้ปัญหา':45}},
+ {id:'CF04',n:'Advertising & Creative',th:'งานโฆษณาและครีเอทีฟ',c:'AP',pos:'Copywriter, Account Executive',s:{'Copywriting':80,'Brand Strategy':55,'Adobe Photoshop':45,'วางแผนสื่อ':40,'Adobe Illustrator':35,'Canva':30,'ความคิดสร้างสรรค์':85,'การนำเสนอ':65,'การสื่อสาร':60,'ทำงานเป็นทีม':50}},
+ {id:'CF05',n:'Digital Marketing & Content',th:'งานการตลาดดิจิทัลและคอนเทนต์',c:'AP',pos:'Content Creator, Digital Marketer',s:{'Social Media Marketing':85,'Content Writing':75,'Copywriting':60,'SEO':55,'Google Analytics':52,'Meta Ads':48,'Canva':45,'วิเคราะห์ข้อมูลการตลาด':42,'ตัดต่อวิดีโอ':40,'ความคิดสร้างสรรค์':60,'การสื่อสาร':55,'การคิดวิเคราะห์':50,'การปรับตัว':40}},
+ {id:'CF06',n:'PR & Corporate Communication',th:'งานประชาสัมพันธ์และสื่อสารองค์กร',c:'AP',pos:'Public Relations Officer',s:{'ประชาสัมพันธ์':85,'Content Writing':60,'จัดอีเวนต์':55,'Social Media Marketing':40,'Copywriting':35,'การสื่อสาร':85,'การนำเสนอ':60,'ทำงานเป็นทีม':55,'ภาวะผู้นำ':35}},
+ {id:'CF07',n:'Graphic & Visual Communication',th:'งานออกแบบกราฟิก',c:'PT',pos:'Graphic Designer',s:{'Adobe Photoshop':82,'Adobe Illustrator':80,'Typography':55,'จัดวางเลย์เอาต์':50,'Adobe InDesign':35,'Canva':30,'ความคิดสร้างสรรค์':75,'ความใส่ใจในรายละเอียด':50,'การสื่อสาร':40}},
+ {id:'CF08',n:'Packaging & Print Design',th:'งานออกแบบบรรจุภัณฑ์',c:'PT',pos:'Packaging Designer',s:{'ออกแบบบรรจุภัณฑ์':85,'Adobe Illustrator':75,'Dieline':60,'Adobe Photoshop':45,'การจัดการสี':35,'ESKO ArtiosCAD':30,'ความคิดสร้างสรรค์':60,'ความใส่ใจในรายละเอียด':55,'การแก้ปัญหา':40}},
+ {id:'CF09',n:'Prepress & Print Production',th:'งานเตรียมพิมพ์และการผลิตสิ่งพิมพ์',c:'PT',pos:'Prepress Technician, Print Production Officer',s:{'เตรียมไฟล์ก่อนพิมพ์':85,'การจัดการสี':70,'ควบคุมคุณภาพงานพิมพ์':65,'Adobe InDesign':50,'Adobe Illustrator':45,'ความใส่ใจในรายละเอียด':80,'การแก้ปัญหา':50,'การบริหารเวลา':45}},
+ {id:'CF10',n:'Web Development',th:'งานพัฒนาเว็บไซต์',c:'WEB',pos:'Front-end, Back-end, Full-stack Developer',s:{'JavaScript':88,'HTML':80,'CSS':78,'React':60,'Git':55,'SQL':50,'Node.js':45,'Responsive Design':40,'การแก้ปัญหา':70,'ทำงานเป็นทีม':55,'การคิดวิเคราะห์':50}},
+ {id:'CF11',n:'UI/UX & Digital Product',th:'งานออกแบบ UI/UX',c:'WEB',pos:'UI Designer, UX Analyst, Web Designer',s:{'Figma':88,'UI Design':80,'Wireframe & Prototype':70,'UX Research':60,'HTML':30,'CSS':30,'Adobe Illustrator':25,'ความคิดสร้างสรรค์':60,'การคิดวิเคราะห์':55,'การสื่อสาร':55,'การนำเสนอ':45}},
+ {id:'CF12',n:'Web Content & Marketing',th:'งานคอนเทนต์และการตลาดบนเว็บ',c:'WEB',pos:'Web Content Manager, SEO Specialist',s:{'SEO':80,'Content Writing':70,'WordPress':65,'Google Analytics':55,'Social Media Marketing':40,'HTML':35,'การสื่อสาร':50,'การคิดวิเคราะห์':50,'ความคิดสร้างสรรค์':40}},
+ {id:'CF13',n:'Game Design & Production',th:'งานออกแบบและผลิตเกม',c:'GAME',pos:'Game Designer, Game Tester',s:{'Game Design':88,'Unity':55,'Game Testing':50,'เขียนบท':30,'Figma':15,'ความคิดสร้างสรรค์':75,'ทำงานเป็นทีม':60,'การสื่อสาร':55,'การแก้ปัญหา':50}},
+ {id:'CF14',n:'Game Development & Technical',th:'งานพัฒนาเกม',c:'GAME',pos:'Game Developer',s:{'Unity':82,'C#':78,'Git':50,'Unreal Engine':45,'C++':40,'Game Design':25,'การแก้ปัญหา':75,'ทำงานเป็นทีม':55,'การคิดวิเคราะห์':50}},
+ {id:'CF15',n:'Game Art & Animation',th:'งานศิลปะเกมและแอนิเมชัน',c:'GAME',pos:'3D Artist, 2D/Concept Artist',s:{'3D Modeling':75,'Blender':65,'Concept Art':60,'Animation':60,'Adobe Photoshop':50,'Autodesk Maya':45,'ความคิดสร้างสรรค์':70,'ความใส่ใจในรายละเอียด':55,'การบริหารเวลา':40}}
+];
+
+const SURVEY = [
+ ['ด้านเนื้อหา',['ผลแนะนำกลุ่มอาชีพสอดคล้องกับทักษะของฉัน','ทักษะที่ระบบเสนอจากข้อความถูกต้อง','Skill Gap ช่วยให้รู้ว่าควรพัฒนาทักษะใด']],
+ ['ด้านการใช้งาน',['ขั้นตอนการกรอกข้อมูลเข้าใจง่าย','การค้นหาและเลือกทักษะจากรายการทำได้สะดวก','หน้าผลลัพธ์อ่านและเข้าใจได้ง่าย']],
+ ['ด้านประโยชน์ที่ได้รับ',['ระบบช่วยให้ฉันเห็นทางเลือกอาชีพมากขึ้น','ฉันตั้งใจพัฒนาทักษะตาม Skill Gap ที่ระบบแนะนำ','ฉันจะแนะนำระบบนี้ให้เพื่อนใช้']]
+];
+const STEPS = ['ข้อมูลทั่วไป','ทักษะ','โครงการ','Portfolio','ยืนยันทักษะ'];
+
+const blank = () => ({gender:'',curr:'',targets:[],hard:[],soft:[],projects:[{name:'',desc:''}],exp:'',cert:'',portfolio:'',sugg:null,extra:[],removed:[],results:null,sel:0,gapIdx:0,gapType:'h',showAll:false,survey:{},note:'',code:'',maxStep:1,surveyDone:false,errs:{}});
+let S = blank();
+let view = 'home', aboutTab = 'how', glossQ = '';
+
+const $ = (q,el=document) => el.querySelector(q);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const isAscii = t => /^[\x00-\x7F]+$/.test(t);
+const reEsc = t => t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+
+function findInText(text, term){
+  if(!text) return -1;
+  if(isAscii(term)){
+    const m = new RegExp('(^|[^a-z0-9+#])(' + reEsc(term) + ')(?![a-z0-9+#])','i').exec(text);
+    return m ? m.index + m[1].length : -1;
+  }
+  return text.indexOf(term);
+}
+function extract(){
+  const sources = [];
+  S.projects.forEach((p,i)=>{ if(p.name) sources.push(p.name); if(p.desc) sources.push(p.desc); });
+  if(S.exp) sources.push(S.exp); if(S.cert) sources.push(S.cert);
+  const have = new Set([...S.hard,...S.soft]);
+  const out = [];
+  for(const sk of SK){
+    if(have.has(sk.n)) continue;
+    let hit = null;
+    for(const src of sources){
+      for(const term of [sk.n,...sk.a]){
+        const i = findInText(src, term);
+        if(i>=0){ hit = {src,i,len:term.length}; break; }
+      }
+      if(hit) break;
+    }
+    if(hit){
+      const a = Math.max(0,hit.i-22), b = Math.min(hit.src.length, hit.i+hit.len+22);
+      const snip = (a>0?'…':'') + esc(hit.src.slice(a,hit.i)) + '<mark>' + esc(hit.src.slice(hit.i,hit.i+hit.len)) + '</mark>' + esc(hit.src.slice(hit.i+hit.len,b)) + (b<hit.src.length?'…':'');
+      out.push({n:sk.n,t:sk.t,snip,on:true});
+    }
+  }
+  return out;
+}
+function confirmedSkills(){
+  const base = [...S.hard,...S.soft].filter(n=>!S.removed.includes(n));
+  const fromSugg = (S.sugg||[]).filter(x=>x.on).map(x=>x.n);
+  return [...new Set([...base,...fromSugg,...S.extra])];
+}
+function score(skills){
+  const set = new Set(skills);
+  return CF.map(cf=>{
+    let tot=0, got=0; const used=[];
+    for(const [n,f] of Object.entries(cf.s)){
+      const w = SKMAP[n].t==='h' ? 1 : .5;
+      tot += f*w;
+      if(set.has(n)){ got += f*w; used.push([n,f]); }
+    }
+    const c = got/tot;
+    const p = 1/(1+Math.exp(-8*(c-.4)));
+    return {cf, pct: Math.max(3, Math.round(p*100)), used: used.sort((a,b)=>b[1]-a[1]).map(x=>x[0])};
+  }).sort((a,b)=>b.pct-a.pct);
+}
+function tipFor(n){
+  const sk = SKMAP[n];
+  if(sk.t==='s') return 'ฝึกผ่านงานกลุ่ม ชมรม หรือการฝึกงาน แล้วเขียนตัวอย่างสถานการณ์ที่ใช้ทักษะนี้ลงในเรซูเม่';
+  return 'เรียนพื้นฐานจากคอร์สออนไลน์ แล้วทำชิ้นงานสั้น ๆ 1 ชิ้นเก็บไว้ใน Portfolio';
+}
+
+/* ---------- navigation ---------- */
+const VIEWS = ['home','about','step-1','step-2','step-3','step-4','step-5','result','gap','survey','thanks'];
+function allowed(v){
+  if(v.startsWith('step-')) return +v.slice(5) <= S.maxStep;
+  if(v==='result'||v==='gap'||v==='survey') return !!S.results;
+  if(v==='thanks') return S.surveyDone;
+  return true;
+}
+function go(v, push=true){
+  if(!VIEWS.includes(v) || !allowed(v)) v = S.results ? 'result' : 'home';
+  view = v;
+  if(v==='step-1' && !S.t0) S.t0 = Date.now();
+  if(push && location.hash !== '#'+v){ try{ history.pushState(null,'','#'+v); }catch(e){ location.hash = v; } }
+  render();
+  window.scrollTo({top:0,behavior:'instant'});
+}
+window.addEventListener('hashchange',()=>go(location.hash.slice(1)||'home',false));
+window.addEventListener('popstate',()=>go(location.hash.slice(1)||'home',false));
+
+function renderMenu(){
+  const cur = view.startsWith('step') ? 'form' : (view==='gap'?'result':view);
+  const items = [['about','เกี่ยวกับระบบ',true],['form','กรอกข้อมูล',true],['result','ผลลัพธ์',!!S.results],['survey','แบบสอบถาม',!!S.results]];
+  $('#menu').innerHTML = items.map(([k,l,en])=>`<button class="${cur===k?'on':''}" ${en?'':'disabled'} data-go="${k==='form'?'step-'+Math.min(S.maxStep,5):k}">${l}</button>`).join('');
+}
+
+/* ---------- modal ---------- */
+function modal(html, wide=false){
+  $('#modal-root').innerHTML = `<div class="modal-bg" data-act="close-bg"><div class="modal ${wide?'wide':''} fade" role="dialog" aria-modal="true">${html}</div></div>`;
+  const f = $('#modal-root [data-autofocus]') || $('#modal-root button'); if(f) f.focus();
+}
+function closeModal(){ $('#modal-root').innerHTML=''; }
+function alertMissing(items){
+  modal(`<div class="ic">!</div><h2>กรอกข้อมูลยังไม่ครบ</h2><p class="sub mt8">กรุณากรอกข้อมูลต่อไปนี้ก่อนไปขั้นถัดไป</p><ul>${items.map(i=>`<li>${i}</li>`).join('')}</ul><div class="acts"><button class="btn pri" data-act="close" data-autofocus>กลับไปกรอก</button></div>`);
+}
+
+/* ---------- views ---------- */
+function vHome(){
+  return `<section class="hero fade">
+   <div>
+    <div class="kicker">สำหรับนักศึกษาคณะเทคโนโลยีสื่อสารมวลชน</div>
+    <h1>ทักษะของคุณ<br>เหมาะกับกลุ่มอาชีพไหน?</h1>
+    <p class="mt16">กรอกเรซูเม่ 5 ขั้น ระบบจะเทียบทักษะของคุณกับความต้องการในประกาศรับสมัครงาน แล้วแนะนำกลุ่มอาชีพ 3 อันดับ พร้อมบอกทักษะที่ยังไม่ได้ระบุ</p>
+    <div class="row mt24"><button class="btn pri" data-go="step-1">เริ่มวิเคราะห์ (ไม่ต้องสมัครสมาชิก)</button><button class="btn sec" data-go="about">ดูวิธีใช้งาน</button></div>
+    <p class="small sub mt16">ใช้เวลาประมาณ 10 นาที · ไม่เก็บชื่อหรือรหัสนักศึกษา</p>
+   </div>
+   <div class="card preview" aria-hidden="true">
+    <div class="small sub">ตัวอย่างหน้าผลลัพธ์</div>
+    ${[['Advertising & Creative',84],['Film & Video Production',83],['Digital Marketing & Content',76]].map(([n,p],i)=>`<div class="pv-row"><div style="flex:1"><div class="small sub">อันดับ ${i+1}</div><div style="font-weight:600">${n}</div><div class="pv-bar"><i style="width:${p}%"></i></div></div><div style="font-family:Kanit;font-size:26px;margin-left:16px">${p}%</div></div>`).join('')}
+   </div>
+  </section>
+  <section class="grid3 mt32">
+   ${[['1','กรอกเรซูเม่','เลือกทักษะจากรายการมาตรฐาน และเล่าโครงการที่เคยทำ'],['2','ดูกลุ่มอาชีพ 3 อันดับ','แนะนำข้ามหลักสูตรได้ ถ้าทักษะของคุณสอดคล้อง'],['3','ดู Skill Gap','รู้ว่าทักษะไหนที่ตลาดต้องการแต่คุณยังไม่ได้ระบุ']].map(([n,t,d])=>`<div class="card step3"><div class="n">ขั้นที่ ${n}</div><h3>${t}</h3><p class="sub small mt8" style="margin-bottom:0">${d}</p></div>`).join('')}
+  </section>`;
+}
+function vAbout(){
+  const tabs = [['how','วิธีใช้งาน'],['cf','15 กลุ่มอาชีพ'],['gloss','คู่มือคำศัพท์ทักษะ']];
+  let body='';
+  if(aboutTab==='how'){
+    body = `<div class="grid2">
+      ${[['กรอกข้อมูล 5 ขั้น','ข้อมูลทั่วไป ทักษะ โครงการ Portfolio (ไม่บังคับ) และยืนยันทักษะ'],['ระบบช่วยหาทักษะ','ระบบอ่านคำอธิบายโครงการ แล้วเสนอทักษะที่คุณอาจลืมระบุ คุณเป็นคนยืนยันเอง'],['แนะนำ 3 กลุ่มอาชีพ','คะแนนของแต่ละกลุ่มคำนวณแยกกัน ร้อยละจึงไม่จำเป็นต้องรวมกันได้ 100'],['Skill Gap','แสดงทักษะที่กลุ่มอาชีพต้องการแต่คุณ “ยังไม่ได้ระบุ” เพราะการไม่ได้เขียน ไม่ได้แปลว่าทำไม่ได้']].map(([t,d],i)=>`<div class="card pad"><div class="kicker">${i+1}</div><h3 style="font-size:20px">${t}</h3><p class="sub small mt8" style="margin:8px 0 0">${d}</p></div>`).join('')}
+    </div>`;
+  } else if(aboutTab==='cf'){
+    body = `<div class="grid3">${CF.map(c=>`<div class="card pad" style="padding:16px 18px"><div class="between"><span class="small sub">${c.id}</span><span class="tag">${c.c==='WEB'?'CMT · WEB':c.c==='GAME'?'CMT · GAME':c.c}</span></div><div style="font-weight:600;margin-top:4px">${c.n}</div><div class="small sub">${c.th}</div><div class="small mt8" style="color:var(--faint)">${c.pos}</div></div>`).join('')}</div>`;
+  } else {
+    const q = glossQ.toLowerCase();
+    const list = HARD.filter(s=>!q || s.n.toLowerCase().includes(q) || s.a.some(a=>a.toLowerCase().includes(q)));
+    body = `<p class="sub small">ระบบแปลงชื่อเรียกอื่นให้เป็น “ชื่อมาตรฐาน” เดียวกันก่อนเทียบกับประกาศงาน เช่น PS กับ Photoshop คือทักษะเดียวกัน</p>
+     <input class="input" id="gloss-q" placeholder="ค้นหา เช่น PS, ตัดต่อ, js" value="${esc(glossQ)}" style="max-width:420px">
+     <div class="card mt16" style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14.5px">
+      <thead><tr><th style="text-align:left;padding:12px 18px;border-bottom:1px solid var(--line)">ชื่อมาตรฐาน</th><th style="text-align:left;padding:12px 18px;border-bottom:1px solid var(--line)">ชื่อเรียกอื่นที่ระบบรู้จัก</th></tr></thead>
+      <tbody id="gloss-body">${glossRows(list)}</tbody></table></div>`;
+  }
+  return `<div class="fade"><h1 style="font-size:32px">เกี่ยวกับระบบ</h1>
+   <div class="tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" class="${aboutTab===k?'on':''}" data-tab="${k}">${l}</button>`).join('')}</div>
+   ${body}
+   <div class="formfoot"><button class="btn sec" data-go="home">กลับหน้าแรก</button><button class="btn pri" data-go="step-1">เริ่มวิเคราะห์</button></div></div>`;
+}
+function glossRows(list){
+  return list.map(s=>`<tr><td style="padding:10px 18px;border-bottom:1px solid var(--line);font-weight:600">${esc(s.n)}</td><td style="padding:10px 18px;border-bottom:1px solid var(--line);color:var(--muted)">${s.a.map(esc).join(' · ')}</td></tr>`).join('') || `<tr><td colspan="2" style="padding:14px 18px;color:var(--faint)">ไม่พบคำนี้ในรายการ</td></tr>`;
+}
+function stepper(n){
+  return `<div class="stepper">${STEPS.map((s,i)=>{const k=i+1;const cls=k===n?'on':(k<n||k<=S.maxStep?'done':'');return `<button class="${cls}" ${k<=S.maxStep&&k!==n?`data-go="step-${k}"`:'disabled'} aria-label="ขั้นที่ ${k} ${s}">${k}. ${s}</button>`;}).join('')}</div>`;
+}
+function head(n,t,d){ return `${stepper(n)}<div class="kicker">ขั้นที่ ${n} จาก 5</div><h1 style="font-size:30px">${t}</h1><p class="sub mt8">${d}</p>`; }
+
+function vStep1(){
+  const e=S.errs;
+  return `<div class="fade">${head(1,'ข้อมูลทั่วไป','ข้อมูลนี้ใช้สรุปผลการวิจัยเท่านั้น ไม่มีการเก็บชื่อหรือรหัสนักศึกษา')}
+   <div class="grid2">
+    <div class="field"><span class="label">เพศ</span><div class="radio">${['ชาย','หญิง','ไม่ระบุ'].map(g=>`<label><input type="radio" name="g" value="${g}" ${S.gender===g?'checked':''} data-bind="gender"> ${g}</label>`).join('')}</div>${e.gender?'<div class="errtxt">กรุณาเลือกเพศ</div>':''}</div>
+    <div class="field"><label class="label" for="curr">หลักสูตรที่กำลังศึกษา</label><select class="input ${e.curr?'err':''}" id="curr" data-bind="curr"><option value="">เลือกหลักสูตร</option>${Object.entries(PROG).map(([k,v])=>`<option value="${k}" ${S.curr===k?'selected':''}>${v}</option>`).join('')}</select>${e.curr?'<div class="errtxt">กรุณาเลือกหลักสูตร</div>':''}</div>
+   </div>
+   <div class="field"><span class="label">กลุ่มอาชีพเป้าหมาย <span class="hint">เลือกได้ไม่เกิน 3 กลุ่ม · เลือกแล้ว ${S.targets.length}/3</span></span>
+    <div class="chips">${CF.map(c=>`<button class="chip ${S.targets.includes(c.id)?'on':''}" data-target="${c.id}" aria-pressed="${S.targets.includes(c.id)}">${c.n}</button>`).join('')}</div>
+    ${e.targets?'<div class="errtxt">กรุณาเลือกอย่างน้อย 1 กลุ่ม</div>':''}
+   </div>
+   <div class="info mt16">ⓘ ตอบก่อนเห็นผล เพื่อใช้ประเมินความแม่นยำของระบบ (Hit@3) <b>คำตอบนี้ไม่ได้ส่งเข้าแบบจำลอง</b> และไม่มีผลต่อการแนะนำ</div>
+   <div class="formfoot"><button class="btn sec" data-go="home">ย้อนกลับ</button><div class="r"><button class="btn pri" data-act="next-1">ถัดไป</button></div></div></div>`;
+}
+function vStep2(){
+  return `<div class="fade">${head(2,'ทักษะ','เลือกจากรายการมาตรฐาน พิมพ์ชื่อเรียกแบบไหนก็ได้ เช่น “PS” ระบบจะหา Adobe Photoshop ให้')}
+   <div class="field"><label class="label" for="pick">ทักษะวิชาชีพ (Hard Skills)</label>
+    <div class="picker"><input class="input ${S.errs.hard?'err':''}" id="pick" autocomplete="off" placeholder="ค้นหาและเลือกจากรายการมาตรฐาน เช่น Figma, ตัดต่อ, PS" aria-autocomplete="list"><div id="dd"></div></div>
+    ${S.errs.hard?'<div class="errtxt">กรุณาเลือกทักษะวิชาชีพอย่างน้อย 1 รายการ</div>':''}
+    <div class="chips mt16" id="hard-chips">${hardChips()}</div>
+   </div>
+   <div class="field mt24"><span class="label">ทักษะทั่วไป (Soft Skills) <span class="hint">แตะเพื่อเลือก</span></span>
+    <div class="chips">${SOFT.map(s=>`<button class="chip ${S.soft.includes(s.n)?'on':''}" data-soft="${esc(s.n)}" aria-pressed="${S.soft.includes(s.n)}">${s.n}</button>`).join('')}</div>
+   </div>
+   <p class="small mt16"><button class="btn ghost" data-act="gloss">คู่มือคำศัพท์ทักษะ ›</button></p>
+   <div class="formfoot"><button class="btn sec" data-go="step-1">ย้อนกลับ</button><div class="r"><button class="btn pri" data-act="next-2">ถัดไป</button></div></div></div>`;
+}
+function hardChips(){
+  return S.hard.length ? S.hard.map(n=>`<button class="chip on" data-unhard="${esc(n)}" aria-label="ลบ ${esc(n)}">${esc(n)} <span class="x">×</span></button>`).join('') : '<span class="small" style="color:var(--faint)">ยังไม่ได้เลือกทักษะ</span>';
+}
+function searchSkills(q, pool){
+  q = q.trim().toLowerCase(); if(!q) return [];
+  const res=[];
+  for(const s of pool){
+    if(s.n.toLowerCase().includes(q)) res.push({n:s.n,via:''});
+    else { const a = s.a.find(x=>x.toLowerCase().includes(q)); if(a) res.push({n:s.n,via:a}); }
+  }
+  return res.slice(0,8);
+}
+function vStep3(){
+  const e=S.errs;
+  return `<div class="fade">${head(3,'โครงการ ประสบการณ์ ใบรับรอง','เล่าสิ่งที่คุณทำด้วยคำของคุณเอง ระบบจะช่วยหาทักษะที่คุณอาจลืมระบุ')}
+   <div class="grid2" style="align-items:start">
+    <div>${S.projects.map((p,i)=>`<div class="card proj"><div class="between"><span class="label" style="margin:0">โครงการที่ ${i+1}</span>${i>0?`<button class="btn ghost small" data-delproj="${i}">ลบ</button>`:''}</div>
+      <input class="input mt8 ${e['pn'+i]?'err':''}" placeholder="ชื่อโครงการ เช่น คลิปรีวิวสินค้าลง TikTok" value="${esc(p.name)}" data-proj="${i}" data-k="name" aria-label="ชื่อโครงการที่ ${i+1}">
+      ${e['pn'+i]?'<div class="errtxt">กรุณากรอกชื่อโครงการ</div>':''}
+      <textarea class="input mt8 ${e['pd'+i]?'err':''}" placeholder="คำอธิบาย: ทำอะไร ใช้เครื่องมืออะไร ได้ผลอย่างไร" data-proj="${i}" data-k="desc" aria-label="คำอธิบายโครงการที่ ${i+1}">${esc(p.desc)}</textarea>
+      ${e['pd'+i]?'<div class="errtxt">กรุณากรอกคำอธิบายโครงการ</div>':''}</div>`).join('')}
+      <button class="btn ghost mt16" data-act="addproj">+ เพิ่มโครงการ</button></div>
+    <div>
+     <div class="field" style="margin-top:14px"><label class="label" for="exp">ประสบการณ์ / ฝึกงาน <span class="hint">ไม่บังคับ</span></label><textarea class="input" id="exp" data-bind="exp" placeholder="ตำแหน่ง สถานที่ และสิ่งที่ทำ" style="min-height:96px">${esc(S.exp)}</textarea></div>
+     <div class="field"><label class="label" for="cert">ใบรับรอง <span class="hint">ไม่บังคับ</span></label><input class="input" id="cert" data-bind="cert" placeholder="ชื่อใบรับรอง · หน่วยงาน" value="${esc(S.cert)}"></div>
+    </div>
+   </div>
+   <div class="formfoot"><button class="btn sec" data-go="step-2">ย้อนกลับ</button><div class="r"><button class="btn pri" data-act="next-3">ถัดไป</button></div></div></div>`;
+}
+function vStep4(){
+  return `<div class="fade">${head(4,'Portfolio (ไม่บังคับ)','ถ้ามีลิงก์ผลงาน ใส่ไว้เพื่อให้ระบบช่วยหาทักษะที่คุณอาจลืมกรอก ถ้าไม่มี กดข้ามได้')}
+   <div class="field" style="max-width:720px"><label class="label" for="pf">ลิงก์ Portfolio</label><input class="input ${S.errs.pf?'err':''}" id="pf" data-bind="portfolio" placeholder="https://" value="${esc(S.portfolio)}" inputmode="url">
+    ${S.errs.pf?'<div class="errtxt">รูปแบบลิงก์ไม่ถูกต้อง ควรขึ้นต้นด้วย https://</div>':''}
+    <div class="card mt16" style="padding:4px 18px">
+     <div class="pfrow"><span class="pfk good">อ่านได้ดีที่สุด</span><div><b>GitHub</b><div class="small sub">ระบบอ่าน README ของโปรเจกต์ เช่น ภาษาและเครื่องมือที่ใช้</div></div></div>
+     <div class="pfrow"><span class="pfk mid">อ่านได้บางส่วน</span><div><b>เว็บไซต์ส่วนตัว · Behance</b><div class="small sub">อ่านเฉพาะข้อความบนหน้าเว็บ เช่น คำอธิบายผลงาน</div></div></div>
+     <div class="pfrow"><span class="pfk low">อ่านเนื้อหาไม่ได้</span><div><b>Google Drive · วิดีโอ · รูปภาพ</b><div class="small sub">ระบบดูเนื้อหาวิดีโอหรือภาพไม่ได้ <button class="btn ghost small" data-go="step-3">เล่ารายละเอียดผลงานในขั้นที่ 3 แทน</button></div></div></div>
+    </div>
+    <div class="info mt16">ⓘ ผลแนะนำคิดจากทักษะที่คุณยืนยันในขั้นที่ 5 เท่านั้น ไม่มี Portfolio ก็ได้ผลเท่ากัน ระบบไม่ได้ประเมินคุณภาพผลงาน ลิงก์จะแนบไปในเรซูเม่ PDF · <b>ในโหมดสาธิตจะไม่อ่านเนื้อหาจากลิงก์จริง</b></div>
+   </div>
+   <div class="formfoot"><button class="btn sec" data-go="step-3">ย้อนกลับ</button><div class="r"><button class="btn sec" data-act="skip-4">ข้ามขั้นนี้</button><button class="btn pri" data-act="next-4">ถัดไป</button></div></div></div>`;
+}
+function vStep5(){
+  if(!S.sugg) S.sugg = extract();
+  const mine = [...S.hard,...S.soft].filter(n=>!S.removed.includes(n));
+  const extra = S.extra;
+  return `<div class="fade">${head(5,'ตรวจและยืนยันทักษะ','ระบบใช้เฉพาะทักษะที่คุณยืนยันในการแนะนำอาชีพ ตรวจให้ครบก่อนกดยืนยัน')}
+   <div class="grid2" style="align-items:start">
+    <div class="card pad"><div class="between"><span class="label" style="margin:0">ทักษะที่คุณเลือก (${mine.length+extra.length})</span></div>
+     <div class="chips mt16">${[...mine,...extra].map(n=>`<button class="chip on" data-rm="${esc(n)}" aria-label="ลบ ${esc(n)}">${esc(n)} <span class="x">×</span></button>`).join('') || '<span class="small" style="color:var(--faint)">ยังไม่มีทักษะ</span>'}</div>
+     <div class="field"><label class="label" for="pick">+ เพิ่มหรือแก้ไขทักษะ</label><div class="picker"><input class="input" id="pick" data-pool="all" autocomplete="off" placeholder="ค้นหาทักษะที่ต้องการเพิ่ม"><div id="dd"></div></div></div>
+    </div>
+    <div class="card pad"><span class="label">ระบบพบทักษะเพิ่มจากข้อความ (${S.sugg.length})</span>
+     <p class="small sub" style="margin:0 0 6px">ติ๊กออกถ้าไม่ใช่ทักษะของคุณ</p>
+     ${S.sugg.length ? S.sugg.map((x,i)=>`<label class="sugg"><input type="checkbox" ${x.on?'checked':''} data-sugg="${i}"><div><div style="font-weight:600">${esc(x.n)} <span class="small sub" style="font-weight:400">· ${x.t==='h'?'Hard':'Soft'}</span></div><div class="src">พบจาก: “${x.snip}”</div></div></label>`).join('') : '<div class="empty-note">ไม่พบทักษะเพิ่มเติม ลองเล่ารายละเอียดโครงการให้มากขึ้นในขั้นที่ 3</div>'}
+    </div>
+   </div>
+   <div class="formfoot"><button class="btn sec" data-go="step-4">ย้อนกลับ</button><div class="r"><button class="btn pri" data-act="confirm">ยืนยันทักษะและดูผล</button></div></div></div>`;
+}
+function resTabs(on){ return `<div class="tabs" role="tablist"><button class="${on==='result'?'on':''}" data-go="result">กลุ่มอาชีพ 3 อันดับ</button><button class="${on==='gap'?'on':''}" data-go="gap">Skill Gap</button></div>`; }
+function vResult(){
+  const R = S.results, top = R.slice(0,3), sel = top[S.sel];
+  const mine = progGroup(S.curr);
+  return `<div class="fade"><div class="kicker">ผลการวิเคราะห์</div><h1 style="font-size:32px">กลุ่มอาชีพที่เหมาะกับคุณ</h1>
+   ${resTabs('result')}
+   <div class="grid3">${top.map((r,i)=>`<button class="rank ${i===S.sel?'sel':''}" data-sel="${i}" aria-pressed="${i===S.sel}">
+     <div class="between"><span class="r">อันดับ ${i+1}</span>${progGroup(r.cf.c)!==mine?'<span class="tag out">นอกหลักสูตร</span>':'<span class="tag">ในหลักสูตร</span>'}</div>
+     <div class="nm">${r.cf.n}</div><div class="th">${r.cf.th}</div>
+     <div class="pct">${r.pct}%</div><div class="bar"><i style="width:${r.pct}%"></i></div></button>`).join('')}</div>
+   <div class="card pad mt24">
+    <div class="between"><span class="label" style="margin:0">ทักษะของคุณที่ทำให้ได้ผลนี้ · อันดับ ${S.sel+1}</span><span class="small sub">ตัวอย่างตำแหน่ง: ${sel.cf.pos}</span></div>
+    <div class="chips mt16">${sel.used.length?sel.used.map(n=>`<span class="chip static">${esc(n)}</span>`).join(''):'<span class="empty-note">ยังไม่มีทักษะที่ตรงกับกลุ่มนี้</span>'}</div>
+   </div>
+   <div class="info mt16">ⓘ ร้อยละของแต่ละกลุ่มอาชีพคำนวณแยกกัน (Multi-label) ผลรวมจึงไม่จำเป็นต้องเท่ากับ 100 <button class="btn ghost small" data-act="toggle-all">${S.showAll?'ซ่อนคะแนนทุกกลุ่ม':'ดูคะแนนทั้ง 15 กลุ่ม'}</button></div>
+   ${S.showAll?`<div class="card pad mt16">${R.map(r=>`<div class="allrow"><span>${r.cf.n}</span><div class="bar"><i style="width:${r.pct}%"></i></div><span style="text-align:right;font-weight:600">${r.pct}%</span></div>`).join('')}</div>`:''}
+   <div class="formfoot"><button class="btn sec" data-go="step-5">แก้ไขทักษะ</button><div class="r"><button class="btn pri" data-go="gap">ดู Skill Gap</button></div></div></div>`;
+}
+function vGap(){
+  const top = S.results.slice(0,3), r = top[S.gapIdx], set = new Set(confirmedSkills());
+  const entries = Object.entries(r.cf.s).filter(([n])=>SKMAP[n].t===S.gapType).sort((a,b)=>b[1]-a[1]);
+  const have = entries.filter(([n])=>set.has(n)), miss = entries.filter(([n])=>!set.has(n));
+  return `<div class="fade"><div class="kicker">ผลการวิเคราะห์</div><h1 style="font-size:32px">กลุ่มอาชีพที่เหมาะกับคุณ</h1>
+   ${resTabs('gap')}
+   <div class="between"><div class="chips">${top.map((x,i)=>`<button class="chip ${i===S.gapIdx?'on':''}" data-gapi="${i}">อันดับ ${i+1} · ${x.cf.n}</button>`).join('')}</div>
+    <div class="seg" role="group" aria-label="ประเภททักษะ"><button class="${S.gapType==='h'?'on':''}" data-gapt="h">Hard Skills</button><button class="${S.gapType==='s'?'on':''}" data-gapt="s">Soft Skills</button></div></div>
+   <div class="gapgrid mt16">
+    <div class="card pad have"><span class="label">ระบุแล้ว (${have.length})</span>
+     ${have.length?`<ul>${have.map(([n,f])=>`<li><span>${esc(n)}</span><span class="small sub">พบใน ${f}% ของประกาศ</span></li>`).join('')}</ul>`:'<div class="empty-note">ยังไม่มีทักษะในหมวดนี้ที่ตรงกับกลุ่มอาชีพ</div>'}</div>
+    <div class="card pad miss"><span class="label">ยังไม่ได้ระบุ (${miss.length})</span>
+     ${miss.length?`<ul>${miss.map(([n,f])=>`<li><div class="top"><span style="font-weight:600">${esc(n)}</span><span class="small sub">พบใน ${f}% ของประกาศ</span></div><div class="bar"><i style="width:${f}%"></i></div><div class="tip">แนวทาง: ${tipFor(n)}</div></li>`).join('')}</ul>`:'<div class="empty-note">คุณระบุทักษะหมวดนี้ครบแล้ว</div>'}</div>
+   </div>
+   <div class="info mt16">ⓘ “ยังไม่ได้ระบุ” ไม่ได้แปลว่าคุณทำไม่ได้ ถ้ามีทักษะนี้อยู่แล้ว ควรเขียนไว้ในเรซูเม่ให้ชัด · ตัวเลขร้อยละเป็นค่าจำลองในโหมดสาธิต</div>
+   <div class="formfoot"><button class="btn sec" data-act="resume">ดาวน์โหลด Resume (PDF)</button><div class="r"><button class="btn pri" data-go="survey">ทำแบบสอบถาม</button></div></div></div>`;
+}
+function vSurvey(){
+  let k=0;
+  return `<div class="fade"><div class="kicker">ขั้นสุดท้าย</div><h1 style="font-size:32px">แบบสอบถามความพึงพอใจ</h1>
+   <p class="sub mt8">1 = น้อยที่สุด · 5 = มากที่สุด · <span class="small">ข้อคำถามในโหมดสาธิตเป็นตัวอย่าง ฉบับจริงผ่านการตรวจ IOC แล้วจึงใช้</span></p>
+   <div class="grid2" style="grid-template-columns:1.5fr 1fr;align-items:start">
+    <div>${SURVEY.map(([t,qs])=>`<div class="card pad qsec mt16"><h3>${t}</h3>${qs.map(q=>{const id='q'+(k++);return `<div class="q ${S.errs[id]?'err':''}"><span class="qt">${q}</span><div class="rate" role="radiogroup" aria-label="${esc(q)}">${[1,2,3,4,5].map(v=>`<button role="radio" aria-checked="${S.survey[id]===v}" class="${S.survey[id]===v?'on':''}" data-rate="${id}" data-v="${v}">${v}</button>`).join('')}</div></div>`}).join('')}</div>`).join('')}</div>
+    <div class="card pad mt16"><label class="label" for="note">ข้อเสนอแนะ <span class="hint">ไม่บังคับ</span></label><textarea class="input" id="note" data-bind="note" style="min-height:200px" placeholder="พิมพ์ข้อเสนอแนะ">${esc(S.note)}</textarea>
+     ${Object.keys(S.errs).some(x=>x.startsWith('q'))?'<div class="errtxt">กรุณาตอบให้ครบทุกข้อ (ข้อที่เป็นสีแดง)</div>':''}
+     <button class="btn pri mt16" style="width:100%" data-act="submit">ส่งแบบสอบถาม</button></div>
+   </div></div>`;
+}
+function vThanks(){
+  return `<div class="done-wrap fade"><div class="ok">✓</div><h1 style="font-size:34px;margin-top:22px">ขอบคุณที่ร่วมทดสอบระบบ</h1>
+   <p class="sub mt8">ผลการใช้งานถูกบันทึกแบบไม่ระบุตัวตนด้วยรหัส <span class="code">${S.code}</span></p>
+   <p class="small" style="color:var(--faint)">ในโหมดสาธิต ข้อมูลอยู่ในเบราว์เซอร์นี้เท่านั้น ไม่ได้ส่งไปเก็บที่ใด${S.saved&&!ON_ARTIFACT?' · เปิดฝั่งผู้วิจัยในเบราว์เซอร์เดียวกันเพื่อดูคำตอบนี้ในแดชบอร์ด':''}</p>
+   <div class="row mt24" style="justify-content:center"><button class="btn sec" data-go="result">ดูผลลัพธ์อีกครั้ง</button><a class="btn sec" data-link="res" href="researcher.html" style="text-decoration:none">ดูในฝั่งผู้วิจัย</a><button class="btn pri" data-act="reset">กลับหน้าแรก</button></div></div>`;
+}
+function render(){
+  renderMenu();
+  const map = {home:vHome,about:vAbout,'step-1':vStep1,'step-2':vStep2,'step-3':vStep3,'step-4':vStep4,'step-5':vStep5,result:vResult,gap:vGap,survey:vSurvey,thanks:vThanks};
+  $('#app').innerHTML = map[view]();
+  fixLinks();
+  document.title = 'Demo · ระบบแนะนำอาชีพและวิเคราะห์ช่องว่างทักษะ';
+}
+
+/* ---------- validation & steps ---------- */
+function next(n){
+  const e={}; let miss=[];
+  if(n===1){
+    if(!S.gender){e.gender=1;miss.push('เพศ');}
+    if(!S.curr){e.curr=1;miss.push('หลักสูตร');}
+    if(!S.targets.length){e.targets=1;miss.push('กลุ่มอาชีพเป้าหมายอย่างน้อย 1 กลุ่ม');}
+  }
+  if(n===2 && !S.hard.length){e.hard=1;miss.push('ทักษะวิชาชีพ (Hard Skills) อย่างน้อย 1 รายการ');}
+  if(n===3){
+    S.projects.forEach((p,i)=>{
+      if(!p.name.trim()){e['pn'+i]=1;miss.push(`ชื่อโครงการที่ ${i+1}`);}
+      if(!p.desc.trim()){e['pd'+i]=1;miss.push(`คำอธิบายโครงการที่ ${i+1}`);}
+    });
+  }
+  if(n===4 && S.portfolio.trim() && !/^https?:\/\/\S+\.\S+/.test(S.portfolio.trim())){ S.errs={pf:1}; render(); return; }
+  S.errs = e;
+  if(miss.length){ render(); alertMissing(miss); return; }
+  if(n===3) S.sugg = null;
+  S.maxStep = Math.max(S.maxStep, n+1);
+  go('step-'+(n+1));
+}
+function confirmSkills(){
+  const all = confirmedSkills();
+  if(!all.length){ alertMissing(['ทักษะอย่างน้อย 1 รายการ']); return; }
+  S.results = score(all); S.sel=0; S.gapIdx=0; S.showAll=false;
+  go('result');
+}
+function submitSurvey(){
+  const e={}; let k=0;
+  SURVEY.forEach(([,qs])=>qs.forEach(()=>{const id='q'+(k++); if(!S.survey[id]) e[id]=1;}));
+  S.errs=e;
+  if(Object.keys(e).length){ render(); const el=$('.q.err'); if(el) el.scrollIntoView({block:'center'}); return; }
+  S.code = 'S-' + Math.random().toString(36).slice(2,6).toUpperCase();
+  const sec = k0 => { const v=[0,1,2].map(i=>S.survey['q'+(k0+i)]); return Math.round(v.reduce((a,b)=>a+b,0)/3*10)/10; };
+  const top3 = S.results.slice(0,3).map(r=>r.cf.id);
+  S.saved = saveResponse({id:S.code, prog:progGroup(S.curr), g:S.gender, targets:[...S.targets], top3, hit: top3.some(c=>S.targets.includes(c))?1:0,
+    tasks:4, time:Math.round((Date.now()-(S.t0||Date.now()-600000))/1000), sc:sec(0), su:sec(3), sb:sec(6), complete:true, seq:Date.now(), live:true});
+  S.surveyDone = true; go('thanks');
+}
+function showResume(){
+  const sk = confirmedSkills(), h = sk.filter(n=>SKMAP[n].t==='h'), s = sk.filter(n=>SKMAP[n].t==='s');
+  modal(`<h2>ดาวน์โหลด Resume (PDF)</h2>
+   <p class="sub small mt8">ชื่อและอีเมลใช้เฉพาะในไฟล์นี้ ไม่ถูกบันทึกในข้อมูลวิจัย</p>
+   <div class="grid2" style="gap:12px"><input class="input" id="rn" placeholder="ชื่อ-นามสกุล" data-autofocus><input class="input" id="re" placeholder="อีเมล"></div>
+   <div id="resume">
+    <h2 id="r-name">ชื่อ-นามสกุล</h2><p id="r-mail" style="color:#5D6375">อีเมล</p>
+    <p style="color:#5D6375">นักศึกษา${esc(PROG[S.curr]||'')} คณะเทคโนโลยีสื่อสารมวลชน มทร.ธัญบุรี</p>
+    <h4>ทักษะวิชาชีพ</h4><div class="rs">${h.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+    ${s.length?`<h4>ทักษะทั่วไป</h4><div class="rs">${s.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
+    <h4>โครงการ</h4><ul style="padding-left:18px;margin:0">${S.projects.filter(p=>p.name).map(p=>`<li><b>${esc(p.name)}</b> · ${esc(p.desc)}</li>`).join('')}</ul>
+    ${S.exp?`<h4>ประสบการณ์</h4><p>${esc(S.exp)}</p>`:''}${S.cert?`<h4>ใบรับรอง</h4><p>${esc(S.cert)}</p>`:''}${S.portfolio?`<h4>Portfolio</h4><p>${esc(S.portfolio)}</p>`:''}
+   </div>
+   <p class="small" style="color:var(--faint);margin-top:12px">ในระบบจริงจะสร้างไฟล์ PDF ให้ดาวน์โหลด ในโหมดสาธิตแสดงเฉพาะตัวอย่างเรซูเม่</p>
+   <div class="acts"><button class="btn pri" data-act="close">ปิด</button></div>`, true);
+}
+
+/* ---------- autofill ---------- */
+function autofill(){
+  S = blank();
+  Object.assign(S,{gender:'หญิง',curr:'AP',targets:['CF04','CF05'],hard:['Copywriting','Canva','Adobe Photoshop'],soft:['ความคิดสร้างสรรค์','การสื่อสาร','ทำงานเป็นทีม'],
+   projects:[{name:'คลิปรีวิวสินค้าลง TikTok',desc:'ถ่ายวิดีโอและตัดต่อคลิปรีวิวสินค้าด้วย Premiere ลง TikTok เขียนแคปชันขายของ และวิเคราะห์ยอดวิวเพื่อปรับคอนเทนต์'}],
+   exp:'ฝึกงานฝ่ายการตลาด บริษัท ABC ดูแลเพจ Facebook ของแบรนด์ร่วมกับทีมกราฟิก',cert:'Google Digital Garage: Fundamentals of Digital Marketing',maxStep:5});
+  go('step-5');
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',ev=>{
+  const t = ev.target.closest('[data-go],[data-act],[data-target],[data-soft],[data-unhard],[data-rm],[data-tab],[data-sel],[data-gapi],[data-gapt],[data-rate],[data-delproj],[data-pick]');
+  if(!t){ return; }
+  const d = t.dataset;
+  if(d.act==='close-bg'){ if(ev.target===t) closeModal(); return; }
+  if(d.go){ closeModal(); go(d.go); return; }
+  if(d.target){
+    const i = S.targets.indexOf(d.target);
+    if(i>=0) S.targets.splice(i,1);
+    else if(S.targets.length<3) S.targets.push(d.target);
+    else { modal(`<div class="ic">!</div><h2>เลือกได้ไม่เกิน 3 กลุ่ม</h2><p class="sub mt8">ยกเลิกกลุ่มที่เลือกไว้ก่อน แล้วจึงเลือกกลุ่มใหม่</p><div class="acts"><button class="btn pri" data-act="close" data-autofocus>ตกลง</button></div>`); return; }
+    delete S.errs.targets; render(); return;
+  }
+  if(d.soft){ const i=S.soft.indexOf(d.soft); i>=0?S.soft.splice(i,1):S.soft.push(d.soft); S.sugg=null; render(); return; }
+  if(d.unhard){ S.hard=S.hard.filter(x=>x!==d.unhard); S.sugg=null; $('#hard-chips').innerHTML=hardChips(); return; }
+  if(d.pick){
+    const n=d.pick, pool=$('#pick').dataset.pool;
+    if(pool==='all'){ if(!confirmedSkills().includes(n)){ S.removed=S.removed.filter(x=>x!==n); if(![...S.hard,...S.soft].includes(n)) S.extra.push(n); } render(); setTimeout(()=>$('#pick')&&$('#pick').focus(),0); }
+    else { if(!S.hard.includes(n)) S.hard.push(n); delete S.errs.hard; S.sugg=null; $('#pick').value=''; $('#dd').innerHTML=''; $('#hard-chips').innerHTML=hardChips(); $('#pick').classList.remove('err'); $('#pick').focus(); }
+    return;
+  }
+  if(d.rm){ const n=d.rm; if(S.extra.includes(n)) S.extra=S.extra.filter(x=>x!==n); else S.removed.push(n); render(); return; }
+  if(d.tab){ aboutTab=d.tab; render(); return; }
+  if(d.sel!==undefined){ S.sel=+d.sel; render(); return; }
+  if(d.gapi!==undefined){ S.gapIdx=+d.gapi; render(); return; }
+  if(d.gapt){ S.gapType=d.gapt; render(); return; }
+  if(d.rate){ S.survey[d.rate]=+d.v; delete S.errs[d.rate]; render(); return; }
+  if(d.delproj!==undefined){ S.projects.splice(+d.delproj,1); render(); return; }
+  switch(d.act){
+    case 'close': closeModal(); break;
+    case 'next-1': next(1); break; case 'next-2': next(2); break; case 'next-3': next(3); break; case 'next-4': next(4); break;
+    case 'skip-4': S.portfolio=''; S.errs={}; S.maxStep=5; go('step-5'); break;
+    case 'confirm': confirmSkills(); break;
+    case 'addproj': S.projects.push({name:'',desc:''}); render(); break;
+    case 'toggle-all': S.showAll=!S.showAll; render(); break;
+    case 'resume': showResume(); break;
+    case 'print': try{ window.print(); }catch(e){} break;
+    case 'submit': submitSurvey(); break;
+    case 'gloss': aboutTab='gloss'; go('about'); break;
+    case 'autofill': autofill(); break;
+    case 'reset': S=blank(); aboutTab='how'; closeModal(); go('home'); break;
+  }
+});
+document.addEventListener('input',ev=>{
+  const t=ev.target, d=t.dataset;
+  if(d.bind){ S[d.bind]=t.value; if(d.bind==='exp'||d.bind==='cert') S.sugg=null; if(d.bind==='portfolio') delete S.errs.pf; if(d.bind==='curr'){ delete S.errs.curr; } return; }
+  if(d.proj!==undefined){ S.projects[+d.proj][d.k]=t.value; S.sugg=null; return; }
+  if(t.id==='pick'){
+    const pool = d.pool==='all' ? SK.filter(s=>!confirmedSkills().includes(s.n)) : HARD.filter(s=>!S.hard.includes(s.n));
+    const res = searchSkills(t.value,pool);
+    $('#dd').innerHTML = t.value.trim() ? `<div class="dd" role="listbox">${res.length?res.map(r=>`<button role="option" data-pick="${esc(r.n)}"><span>${esc(r.n)}</span>${r.via?`<span class="via">ชื่อเรียกอื่น: ${esc(r.via)}</span>`:''}</button>`).join(''):'<div class="empty">ไม่พบในรายการมาตรฐาน ลองดูคู่มือคำศัพท์ทักษะ</div>'}</div>` : '';
+    return;
+  }
+  if(t.id==='rn'){ $('#r-name').textContent=t.value||'ชื่อ-นามสกุล'; return; }
+  if(t.id==='re'){ $('#r-mail').textContent=t.value||'อีเมล'; return; }
+  if(t.id==='gloss-q'){ glossQ=t.value; const q=glossQ.toLowerCase(); $('#gloss-body').innerHTML=glossRows(HARD.filter(s=>!q||s.n.toLowerCase().includes(q)||s.a.some(a=>a.toLowerCase().includes(q)))); return; }
+});
+document.addEventListener('change',ev=>{
+  const t=ev.target, d=t.dataset;
+  if(d.bind==='gender'){ S.gender=t.value; delete S.errs.gender; }
+  if(d.bind==='curr'){ S.curr=t.value; }
+  if(d.sugg!==undefined){ S.sugg[+d.sugg].on=t.checked; }
+});
+document.addEventListener('keydown',ev=>{
+  if(ev.key==='Escape') closeModal();
+  if(ev.key==='Enter' && ev.target.id==='pick'){ const b=$('#dd [data-pick]'); if(b){ ev.preventDefault(); b.click(); } }
+});
+document.addEventListener('click',ev=>{ if(!ev.target.closest('.picker')){ const dd=$('#dd'); if(dd) dd.innerHTML=''; } });
+
+go((location.hash||'').slice(1)||'home',false);
+</script>
+</body>
+</html>

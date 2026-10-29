@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ส่วนผู้วิจัย · ระบบแนะนำอาชีพ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Kanit:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: sticky researcher nav + single content column; same tokens as the student demo */
+:root{
+  --bg:#F6F5F1;--surface:#FFFEFB;--surface2:#F0EEE8;--line:#E2DED5;--line2:#CFCAC0;
+  --text:#1F2A44;--muted:#5D6375;--faint:#8A8E99;
+  --pri:#1F2A44;--on-pri:#FFFFFF;
+  --accent:#B5521F;--accent-soft:#F8E6DA;
+  --blue:#2E6FB0;--blue-soft:#E6EEF7;
+  --green:#2E7D52;--green-soft:#E3F0E8;
+  --danger:#B3261E;--danger-soft:#FBE7E5;
+  --scrim:rgba(20,26,40,.45);
+  --f-display:'Kanit','IBM Plex Sans Thai',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans Thai',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
+  --f-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141A28;--surface:#1C2436;--surface2:#242E44;--line:#334059;--line2:#45536F;
+  --text:#E8EAF0;--muted:#AEB5C4;--faint:#7F879A;--pri:#E6EBF5;--on-pri:#141A28;
+  --accent:#EBA374;--accent-soft:#3B2A20;--blue:#86B6EA;--blue-soft:#1E2F46;
+  --green:#7FC79F;--green-soft:#1D3428;--danger:#F28B82;--danger-soft:#3B2224;--scrim:rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141A28;--surface:#1C2436;--surface2:#242E44;--line:#334059;--line2:#45536F;
+  --text:#E8EAF0;--muted:#AEB5C4;--faint:#7F879A;--pri:#E6EBF5;--on-pri:#141A28;
+  --accent:#EBA374;--accent-soft:#3B2A20;--blue:#86B6EA;--blue-soft:#1E2F46;
+  --green:#7FC79F;--green-soft:#1D3428;--danger:#F28B82;--danger-soft:#3B2224;--scrim:rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--f-body);font-size:16px;line-height:1.6}
+h1,h2,h3{font-family:var(--f-display);font-weight:500;line-height:1.3;margin:0;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1140px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.num{font-variant-numeric:tabular-nums}
+
+.demo{background:var(--accent-soft);font-size:14px}
+.demo .wrap{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-block:8px}
+.demo b{color:var(--accent);font-weight:600}
+.mini{border:1px solid var(--line2);background:var(--surface);border-radius:8px;padding:4px 12px;font-size:13.5px}
+a.mini{text-decoration:none;color:var(--text);display:inline-flex;align-items:center}
+.mini.sw{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
+.pill.live{background:var(--accent-soft);color:var(--accent)}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--surface)}
+.nav{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.mark{width:34px;height:34px;border-radius:9px;background:var(--pri);color:var(--on-pri);display:grid;place-items:center;font-family:var(--f-display);font-size:17px}
+.brand b{font-weight:600;font-size:15px}
+.rtag{font-size:12.5px;font-weight:600;color:var(--accent);border:1.5px solid var(--accent);border-radius:10px;padding:0 9px}
+.menu{display:flex;gap:4px;align-items:center;overflow-x:auto;max-width:100%}
+.menu a{text-decoration:none;color:var(--muted);padding:8px 12px;border-radius:8px;font-size:15px;white-space:nowrap}
+.menu a.on{color:var(--text);font-weight:600;background:var(--surface2)}
+.menu button{margin-left:8px}
+
+main{padding-block:28px 64px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:10px;font-weight:600;font-size:15px;border:1.5px solid transparent;white-space:nowrap}
+.btn.pri{background:var(--pri);color:var(--on-pri)}
+.btn.sec{background:var(--surface);border-color:var(--line2)}
+.btn.sm{min-height:36px;padding:0 14px;font-size:14px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.menu a:focus-visible,input:focus-visible,select:focus-visible,.mini:focus-visible{outline:2.5px solid var(--blue);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.pad{padding:20px 22px}
+.kicker{font-size:14px;font-weight:600;color:var(--accent)}
+.sub{color:var(--muted)}.small{font-size:14px}.faint{color:var(--faint)}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.head h1{font-size:30px}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr) minmax(0,1fr)}
+.info{background:var(--surface2);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--muted)}
+.info b{color:var(--text)}
+
+/* login */
+.login{max-width:440px;margin:24px auto 0}
+.label{display:block;font-weight:600;font-size:15px;margin:14px 0 6px}
+.input{width:100%;min-height:46px;border:1.5px solid var(--line2);background:var(--surface);border-radius:10px;padding:10px 14px}
+.input.err{border-color:var(--danger)}
+.hintbox{border:1.5px dashed var(--line2);border-radius:10px;padding:10px 14px;font-size:14px;margin-top:16px}
+.hintbox code{font-family:var(--f-mono);background:var(--surface2);padding:1px 7px;border-radius:5px}
+
+/* lock + stats */
+.lock{background:var(--surface2);border-color:transparent}
+.lock .top{display:flex;align-items:center;gap:10px;font-weight:600}
+.lock svg{flex:none}
+.vgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:12px}
+.vgrid div span{display:block;font-size:13.5px;color:var(--muted)}
+.vgrid div b{font-weight:600}
+.stat .lbl{font-size:14px;color:var(--muted)}
+.stat .v{font-family:var(--f-display);font-size:34px;font-weight:600;line-height:1.15;margin-top:4px}
+.pill{display:inline-block;font-size:12.5px;font-weight:600;border-radius:10px;padding:1px 10px}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+.pill.no{background:var(--danger-soft);color:var(--danger)}
+.pill.wait{background:var(--surface2);color:var(--muted)}
+.crit{font-size:13px;color:var(--faint);margin-top:6px}
+
+/* bars */
+.bar{height:10px;background:var(--surface2);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pri);border-radius:5px;transition:width .5s ease}
+.bar.done i{background:var(--green)}
+.brow{display:grid;grid-template-columns:minmax(120px,230px) minmax(0,1fr) 70px;gap:14px;align-items:center;padding:8px 0;font-size:15px}
+.brow .r{text-align:right}
+.hbar{position:relative}
+.hbar .ref{position:absolute;top:-4px;bottom:-4px;width:0;border-left:2px dashed var(--accent)}
+
+/* table */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:14px;padding:11px 14px;border-bottom:1.5px solid var(--line2);background:var(--surface2);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tfoot td{font-weight:600;background:var(--surface2)}
+
+/* export */
+.check{display:flex;gap:10px;align-items:center;padding:6px 0;font-size:15px;cursor:pointer}
+.check input{width:19px;height:19px;accent-color:var(--pri)}
+.csv{width:100%;min-height:150px;font-family:var(--f-mono);font-size:12.5px;line-height:1.5;border:1.5px solid var(--line2);border-radius:10px;padding:10px 12px;background:var(--surface);resize:vertical;white-space:pre}
+.pv td,.pv th{font-size:13.5px;padding:8px 10px;white-space:nowrap}
+.mono{font-family:var(--f-mono);font-size:13px}
+
+.modal-bg{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:16px;max-width:440px;width:100%;padding:26px 28px;text-align:center}
+.modal .ic{width:52px;height:52px;border-radius:50%;border:2.5px solid var(--danger);color:var(--danger);display:grid;place-items:center;font-weight:700;font-size:26px;margin:0 auto 12px}
+.modal h2{font-size:24px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--pri);color:var(--on-pri);padding:10px 18px;border-radius:10px;font-size:14.5px;z-index:60}
+
+.fade{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}.bar i{transition:none}}
+@media (max-width:860px){
+  .g4,.vgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g2,.g3{grid-template-columns:minmax(0,1fr)}
+  .head h1{font-size:26px}
+  .brow{grid-template-columns:minmax(0,1fr) 62px}
+  .brow .bar,.brow .hbar{grid-column:1/-1;grid-row:2}
+  .nav .wrap{padding-block:8px}
+}
+</style>
+</head>
+<body>
+
+
+<div class="demo"><div class="wrap">
+  <div><b>โหมดสาธิต</b> · ข้อมูลผู้ตอบทั้งหมดเป็นข้อมูลจำลอง ไม่ใช่ผลการเก็บข้อมูลจริง</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="mini" id="reset-btn" data-act="reset">รีเซ็ตข้อมูลจำลอง</button><a class="mini sw" data-link="stu" href="index.html">← ไปฝั่งผู้ใช้งาน</a></div>
+</div></div>
+<nav class="nav"><div class="wrap">
+  <div class="brand"><div class="mark">C</div><b>ระบบแนะนำอาชีพ</b><span class="rtag">ส่วนผู้วิจัย</span></div>
+  <div class="menu" id="menu"></div>
+</div></nav>
+<main><div class="wrap" id="app"></div></main>
+<div id="modal-root"></div>
+
+<script>
+const ON_ARTIFACT = /claudeusercontent|claude\.ai|claude\.site/.test(location.hostname);
+const LINKS = ON_ARTIFACT
+  ? {res:'https://claude.ai/artifact/Xx3VjTMGjfb323w4MJHTpt', stu:'https://claude.ai/artifact/4FNy7fhFaLTFovg23APinc'}
+  : {res:'researcher.html', stu:'index.html'};
+const STORE_KEY = 'career-demo-responses';
+function fixLinks(){ document.querySelectorAll('[data-link]').forEach(a=>{ a.href = LINKS[a.dataset.link]; if(ON_ARTIFACT){ a.target='_blank'; a.rel='noopener'; } }); }
+function loadLive(){ try{ const a = JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); return Array.isArray(a) ? a.filter(r=>r && r.id && r.prog) : []; }catch(e){ return []; } }
+const PROG = {FTP:'เทคโนโลยีการผลิตภาพยนตร์และวิทยุโทรทัศน์',AP:'เทคโนโลยีการโฆษณาและประชาสัมพันธ์',PT:'เทคโนโลยีการพิมพ์ดิจิทัลและบรรจุภัณฑ์',CMT:'ครีเอทีฟมีเดียเทคโนโลยี (WEB / GAME)'};
+const SHORT = {FTP:'ภาพยนตร์ฯ',AP:'โฆษณาฯ',PT:'พิมพ์ดิจิทัลฯ',CMT:'ครีเอทีฟมีเดีย'};
+const CF = {FTP:['CF01','CF02','CF03'],AP:['CF04','CF05','CF06'],PT:['CF07','CF08','CF09'],CMT:['CF10','CF11','CF12','CF13','CF14','CF15']};
+const ALLCF = Object.values(CF).flat();
+const QUOTA = 46, TOTAL = 184;
+const START = {FTP:46,AP:38,PT:46,CMT:29};
+const HITP = {FTP:.74,AP:.68,PT:.62,CMT:.8};
+const CREDS = {u:'researcher',p:'demo1234'};
+
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let R = rng(20261030);
+const pick = a => a[Math.floor(R()*a.length)];
+const pickN = (a,n) => {const c=[...a],o=[];while(o.length<n&&c.length)o.push(c.splice(Math.floor(R()*c.length),1)[0]);return o;};
+let seq = 0;
+function makeOne(prog, complete=true){
+  const g = R()<.45?'ชาย':R()<.92?'หญิง':'ไม่ระบุ';
+  const own = CF[prog];
+  const nT = 1+Math.floor(R()*3);
+  const targets = pickN(R()<.8?own:ALLCF, nT);
+  const hit = R()<HITP[prog];
+  let top3;
+  if(hit){ const t=pick(targets); top3=[t,...pickN(ALLCF.filter(x=>x!==t),2)]; if(R()<.5) top3.reverse(); }
+  else top3 = pickN(ALLCF.filter(x=>!targets.includes(x)),3);
+  const tasks = R()<.88?4:(R()<.6?3:2);
+  const s = () => Math.min(5,Math.max(2,Math.round(4.1+(R()-.45)*1.8)));
+  const id = 'S-' + (Math.floor(R()*1679616)).toString(36).toUpperCase().padStart(4,'0');
+  seq++;
+  return {id,prog,g,targets,top3,hit:hit?1:0,tasks,time:Math.round(360+R()*540),sc:s(),su:s(),sb:s(),complete,seq};
+}
+function seed(){
+  R = rng(20261030); seq=0;
+  const out=[];
+  for(const [p,n] of Object.entries(START)) for(let i=0;i<n;i++) out.push(makeOne(p,true));
+  ['AP','CMT','FTP','CMT','PT','AP'].forEach(p=>{const r=makeOne(p,false); r.tasks=Math.min(r.tasks,2); r.sc=r.su=r.sb=null; out.push(r);});
+  return out;
+}
+let DATA = seed().concat(loadLive());
+let authed = false, view = 'login', lastUpdate = new Date();
+let exp = {prog:'ALL',complete:true,cols:{gen:true,target:true,skills:true,tasks:true,survey:true}};
+
+const $ = q => document.querySelector(q);
+const pct = (a,b) => b ? Math.round(a/b*100) : 0;
+const pw = (a,b) => Math.min(100, pct(a,b));
+const mean = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : 0;
+const fmtTime = d => d.toLocaleString('th-TH',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const done = () => DATA.filter(r=>r.complete);
+const byProg = p => done().filter(r=>r.prog===p);
+
+/* routing */
+const VIEWS = ['login','dashboard','quota','hit3','export'];
+function go(v, push=true){
+  if(!VIEWS.includes(v)) v='login';
+  if(!authed && v!=='login') v='login';
+  if(authed && v==='login') v='dashboard';
+  view=v;
+  if(push && location.hash!=='#'+v){ try{history.pushState(null,'','#'+v);}catch(e){location.hash=v;} }
+  render(); window.scrollTo({top:0});
+}
+window.addEventListener('hashchange',()=>go(location.hash.slice(1),false));
+window.addEventListener('popstate',()=>go(location.hash.slice(1),false));
+
+function menu(){
+  if(!authed){ $('#menu').innerHTML = '<span class="small sub">ต้องยืนยันตัวตนก่อนเข้าใช้</span>'; return; }
+  const items=[['dashboard','แดชบอร์ด'],['quota','ติดตามโควตา'],['hit3','สรุป Hit@3'],['export','ส่งออกข้อมูล']];
+  $('#menu').innerHTML = items.map(([k,l])=>`<a href="#${k}" class="${view===k?'on':''}">${l}</a>`).join('') + '<button class="btn sec sm" data-act="logout">ออกจากระบบ</button>';
+}
+
+/* views */
+function vLogin(){
+  return `<div class="login fade"><div class="card pad" style="padding:30px 32px">
+   <h1 style="font-size:28px;text-align:center">เข้าสู่ส่วนผู้วิจัย</h1>
+   <p class="sub small" style="text-align:center;margin:4px 0 6px">สำหรับผู้วิจัยเท่านั้น ไม่เปิดให้ผู้ใช้งานทั่วไป</p>
+   <form id="login-form" novalidate>
+    <label class="label" for="lu">ชื่อผู้ใช้</label><input class="input" id="lu" autocomplete="username" placeholder="ชื่อผู้ใช้">
+    <label class="label" for="lp">รหัสผ่าน</label><input class="input" id="lp" type="password" autocomplete="current-password" placeholder="รหัสผ่าน">
+    <button class="btn pri" type="submit" style="width:100%;margin-top:22px">เข้าสู่ระบบ</button>
+   </form>
+   <div class="hintbox">บัญชีสาธิต · ชื่อผู้ใช้ <code>${CREDS.u}</code> รหัสผ่าน <code>${CREDS.p}</code>
+    <div class="faint" style="font-size:13px;margin-top:4px">ลองใส่รหัสผิดเพื่อดู Pop-up แจ้งเตือนได้</div></div>
+   <div style="text-align:center;margin-top:14px"><a data-link="stu" href="index.html" style="color:var(--blue);font-size:14px">กลับหน้าแรกของเว็บไซต์ (ฝั่งผู้ใช้งาน)</a></div>
+  </div></div>`;
+}
+function lockBox(){
+  const lockIc = `<svg width="18" height="20" viewBox="0 0 18 20" aria-hidden="true"><rect x="2" y="9" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>`;
+  return `<div class="card pad lock">
+   <div class="top">${lockIc}<span>เวอร์ชันที่ใช้ทดสอบ · ล็อกไว้ เปลี่ยนไม่ได้ตลอดการทดสอบ</span></div>
+   <div class="vgrid">
+    <div><span>ชุดข้อมูลประกาศงาน</span><b>v1.0 · [จำนวน] ประกาศ</b></div>
+    <div><span>มาตรฐานทักษะ</span><b>ESCO v1.2.1</b></div>
+    <div><span>แบบจำลองที่ใช้</span><b>[แบบจำลองที่เลือก] v1.0</b></div>
+    <div><span>Macro F1 บนชุดทดสอบ</span><b>รอผลการทดลอง</b></div>
+   </div>
+   <div class="small faint" style="margin-top:10px">ล็อกก่อนเริ่มเก็บข้อมูลกับกลุ่มตัวอย่าง · ผู้ใช้ทั้ง 184 คนใช้ระบบเวอร์ชันเดียวกัน</div></div>`;
+}
+function vDashboard(){
+  const d=done(), n=d.length;
+  const succ = pct(d.filter(r=>r.tasks===4).length,n);
+  const sat = mean(d.map(r=>(r.sc+r.su+r.sb)/3));
+  const hit = pct(d.filter(r=>r.hit).length,n);
+  const stat=(l,v,pill,crit)=>`<div class="card pad stat"><div class="lbl">${l}</div><div class="v num">${v}</div>${pill}<div class="crit">${crit}</div></div>`;
+  return `<div class="fade">
+   <div class="head"><div><div class="kicker">ภาพรวม</div><h1>แดชบอร์ด</h1></div><div class="small faint">อัปเดตล่าสุด ${fmtTime(lastUpdate)}</div></div>
+   ${lockBox()}
+   <div class="grid g4" style="margin-top:16px">
+    ${stat('ผู้ตอบครบถ้วน',`${n}<span class="sub" style="font-size:20px"> / ${TOTAL}</span>`, n>=TOTAL?'<span class="pill ok">ครบโควตา</span>':'<span class="pill wait">กำลังเก็บข้อมูล</span>','นับตามเกณฑ์คัดออก')}
+    ${stat('ทำครบ 4 งาน (H3)',succ+'%', succ>=80?'<span class="pill ok">สูงกว่าเกณฑ์</span>':'<span class="pill no">ต่ำกว่าเกณฑ์</span>','เกณฑ์ ≥ ร้อยละ 80')}
+    ${stat('ความพึงพอใจเฉลี่ย (H3)',sat.toFixed(2), sat>3.5?'<span class="pill ok">สูงกว่าเกณฑ์</span>':'<span class="pill no">ต่ำกว่าเกณฑ์</span>','เกณฑ์ > 3.50 จาก 5')}
+    ${stat('Hit@3 ภาพรวม',hit+'%','<span class="pill wait">ผลประกอบ</span>','ไม่ใช่เกณฑ์ผ่านสมมติฐาน')}
+   </div>
+   <div class="card pad" style="margin-top:16px">
+    <div class="head" style="margin-bottom:6px"><h3 style="font-size:19px">ความคืบหน้าโควตา</h3><a class="small" href="#quota" style="color:var(--blue)">ดูรายละเอียด ›</a></div>
+    ${Object.keys(PROG).map(p=>{const c=byProg(p).length;return `<div class="brow"><span>${SHORT[p]}</span><div class="bar ${c>=QUOTA?'done':''}"><i style="width:${pw(c,QUOTA)}%"></i></div><span class="r num">${c} / ${QUOTA}</span></div>`}).join('')}
+   </div>
+   ${DATA.some(r=>r.live)?`<div class="info" style="margin-top:16px">ⓘ รวมคำตอบที่กรอกจากหน้าผู้ใช้ในเบราว์เซอร์นี้ <b>${DATA.filter(r=>r.live).length} คน</b> (ดูรายชื่อล่าสุดในหน้าสรุป Hit@3)</div>`:''}
+   <div class="info" style="margin-top:16px">ⓘ ตัวเลข H3 ในหน้านี้เป็นค่าเชิงพรรณนาเพื่อติดตามระหว่างเก็บข้อมูล การทดสอบสมมติฐาน (z-test, t-test) ทำหลังส่งออก CSV</div>
+  </div>`;
+}
+function vQuota(){
+  const rows = Object.keys(PROG).map(p=>{const c=byProg(p).length;return {p,c,left:Math.max(0,QUOTA-c)};});
+  const sum = rows.reduce((a,r)=>a+r.c,0), allFull = rows.every(r=>r.c>=QUOTA);
+  const excluded = DATA.filter(r=>!r.complete).length;
+  return `<div class="fade">
+   <div class="head"><div><div class="kicker">การเก็บข้อมูล</div><h1>ติดตามโควตา</h1></div><div class="small sub">เป้าหมาย ${QUOTA} คนต่อหลักสูตร · รวม ${TOTAL} คน</div></div>
+   <div class="card tbl-wrap"><table>
+    <thead><tr><th>หลักสูตร</th><th class="n">เป้าหมาย</th><th class="n">เก็บแล้ว</th><th class="n">คงเหลือ</th><th style="min-width:180px">ความคืบหน้า</th><th>สถานะ</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td>${PROG[r.p]}</td><td class="n">${QUOTA}</td><td class="n">${r.c}</td><td class="n">${r.left}</td><td><div class="bar ${r.c>=QUOTA?'done':''}"><i style="width:${pw(r.c,QUOTA)}%"></i></div></td><td>${r.c>=QUOTA?'<span class="pill ok">ครบแล้ว</span>':'<span class="pill wait">ยังไม่ครบ</span>'}</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td>รวม</td><td class="n">${TOTAL}</td><td class="n">${sum}</td><td class="n">${TOTAL-sum}</td><td><div class="bar"><i style="width:${pw(sum,TOTAL)}%"></i></div></td><td>${allFull?'<span class="pill ok">ครบทุกหลักสูตร</span>':''}</td></tr></tfoot>
+   </table></div>
+   <div class="grid g2" style="margin-top:16px">
+    <div class="info">ⓘ นับเฉพาะผู้ที่ทำครบทุกขั้นตอนและตอบแบบสอบถามครบ · มีผู้ที่ถูกคัดออกตามเกณฑ์ <b>${excluded} ราย</b> (ทำไม่ครบหรือตอบไม่ครบ) ซึ่งไม่นับรวมในโควตา</div>
+    <div class="card pad" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+     <div><div style="font-weight:600">${allFull?'เก็บข้อมูลครบโควตาแล้ว':'ยังไม่ครบโควตา · นัดหลักสูตรที่เหลือ'}</div><div class="small sub">สาธิต: เพิ่มผู้ตอบจำลอง 1 คนในหลักสูตรที่ยังไม่ครบ</div></div>
+     <button class="btn pri sm" data-act="sim" ${allFull?'disabled':''}>+ จำลองผู้ตอบใหม่</button>
+    </div>
+   </div>
+  </div>`;
+}
+function hitRows(groups){
+  return groups.map(([label,arr])=>{const h=arr.filter(r=>r.hit).length,v=pct(h,arr.length);
+    return `<div class="brow"><span>${label} <span class="faint small">(n=${arr.length})</span></span><div class="bar"><i style="width:${v}%"></i></div><span class="r num" style="font-weight:600">${arr.length?v+'%':'–'}</span></div>`;}).join('');
+}
+function vHit3(){
+  const d=done(), h=d.filter(r=>r.hit).length;
+  const progG = Object.keys(PROG).map(p=>[SHORT[p],d.filter(r=>r.prog===p)]);
+  const genG = ['ชาย','หญิง','ไม่ระบุ'].map(g=>[g,d.filter(r=>r.g===g)]);
+  return `<div class="fade">
+   <div class="head"><div><div class="kicker">ผลประกอบ</div><h1>สรุป Hit@3</h1></div></div>
+   <p class="sub" style="margin:-8px 0 18px;max-width:70ch">สัดส่วนผู้ใช้ที่กลุ่มอาชีพเป้าหมายอย่างน้อย 1 กลุ่ม (ระบุไว้ก่อนเห็นผล) อยู่ใน 3 อันดับแรกที่ระบบแนะนำ</p>
+   <div class="grid g3">
+    <div class="card pad stat" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+     <div class="lbl">Hit@3 ภาพรวม</div><div class="v num" style="font-size:56px">${pct(h,d.length)}%</div><div class="small sub num">ตรง ${h} จาก ${d.length} คน</div></div>
+    <div class="card pad"><h3 style="font-size:18px;margin-bottom:4px">รายหลักสูตร</h3>${hitRows(progG)}</div>
+    <div class="card pad"><h3 style="font-size:18px;margin-bottom:4px">รายเพศ</h3>${hitRows(genG)}</div>
+   </div>
+   <div class="card tbl-wrap" style="margin-top:16px"><table>
+    <thead><tr><th>ตัวอย่างผู้ตอบล่าสุด</th><th>หลักสูตร</th><th>อาชีพเป้าหมาย</th><th>ระบบแนะนำ 3 อันดับ</th><th>Hit@3</th></tr></thead>
+    <tbody>${[...d].sort((a,b)=>b.seq-a.seq).slice(0,5).map(r=>`<tr><td class="mono">${r.id}${r.live?' <span class="pill live">จากหน้าผู้ใช้</span>':''}</td><td>${r.prog}</td><td class="mono">${r.targets.join(', ')}</td><td class="mono">${r.top3.map(c=>r.targets.includes(c)?`<b style="color:var(--green)">${c}</b>`:c).join(', ')}</td><td>${r.hit?'<span class="pill ok">ตรง</span>':'<span class="pill wait">ไม่ตรง</span>'}</td></tr>`).join('')}</tbody>
+   </table></div>
+   <div class="info" style="margin-top:16px">ⓘ Hit@3 เป็นผลประกอบ ไม่ใช่เกณฑ์ผ่านของสมมติฐาน · อาชีพเป้าหมายไม่ได้ใช้เป็นข้อมูลนำเข้าของแบบจำลอง · การแนะนำที่ต่างจากเป้าหมาย อาจหมายถึงระบบเปิดมุมมองอาชีพใหม่</div>
+  </div>`;
+}
+function filtered(){ return DATA.filter(r=>(exp.prog==='ALL'||r.prog===exp.prog)&&(!exp.complete||r.complete)); }
+function csvCols(){
+  const c=[['respondent_id',r=>r.id]];
+  if(exp.cols.gen) c.push(['gender',r=>r.g],['program',r=>r.prog]);
+  if(exp.cols.target) c.push(['target_cf',r=>r.targets.join('|')],['top1',r=>r.top3[0]],['top2',r=>r.top3[1]],['top3',r=>r.top3[2]],['hit3',r=>r.hit]);
+  if(exp.cols.skills) c.push(['confirmed_skill_count',r=>8+(r.id.charCodeAt(2)%7)]);
+  if(exp.cols.tasks) c.push(['tasks_completed',r=>r.tasks],['all_tasks_success',r=>r.tasks===4?1:0],['total_time_sec',r=>r.time]);
+  if(exp.cols.survey) c.push(['sat_content',r=>r.sc??''],['sat_usability',r=>r.su??''],['sat_benefit',r=>r.sb??'']);
+  c.push(['complete',r=>r.complete?1:0]);
+  return c;
+}
+function csvText(){ const c=csvCols(); return [c.map(x=>x[0]).join(','),...filtered().map(r=>c.map(x=>x[1](r)).join(','))].join('\n'); }
+function vExport(){
+  const rows=filtered(), c=csvCols();
+  const box=(k,l)=>`<label class="check"><input type="checkbox" id="col-${k}" data-col="${k}" ${exp.cols[k]?'checked':''}>${l}</label>`;
+  return `<div class="fade">
+   <div class="head"><div><div class="kicker">ข้อมูลสำหรับวิเคราะห์</div><h1>ส่งออกข้อมูล (CSV)</h1></div></div>
+   <div class="grid" style="grid-template-columns:minmax(0,340px) minmax(0,1fr);align-items:start" id="exp-grid">
+    <div class="card pad">
+     <h3 style="font-size:18px">เลือกชุดข้อมูล</h3>
+     ${box('gen','ข้อมูลทั่วไป (เพศ หลักสูตร)')}${box('target','อาชีพเป้าหมาย และผลแนะนำ 3 อันดับ')}${box('skills','จำนวนทักษะที่ยืนยัน')}${box('tasks','บันทึกการทดสอบ 4 งาน')}${box('survey','คำตอบแบบสอบถาม')}
+     <label class="label" for="ex-prog">หลักสูตร</label>
+     <select class="input" id="ex-prog"><option value="ALL">ทั้งหมด</option>${Object.keys(PROG).map(p=>`<option value="${p}" ${exp.prog===p?'selected':''}>${SHORT[p]}</option>`).join('')}</select>
+     <label class="check" style="margin-top:10px"><input type="checkbox" id="ex-complete" ${exp.complete?'checked':''}>เฉพาะข้อมูลที่ครบถ้วน</label>
+    </div>
+    <div class="card pad" style="min-width:0">
+     <div class="head" style="margin-bottom:10px"><h3 style="font-size:18px">ตัวอย่างข้อมูล</h3><span class="small sub num">${rows.length} แถว · ${c.length} คอลัมน์</span></div>
+     <div class="tbl-wrap" style="border:1px solid var(--line);border-radius:10px"><table class="pv"><thead><tr>${c.map(x=>`<th>${x[0]}</th>`).join('')}</tr></thead>
+      <tbody>${rows.slice(0,5).map(r=>`<tr>${c.map(x=>`<td class="mono">${x[1](r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+     <div class="info" style="margin-top:12px">ⓘ ไฟล์ไม่มีชื่อหรือรหัสนักศึกษา ใช้รหัสสุ่มแทน · <b>ในโหมดสาธิตดาวน์โหลดไฟล์ไม่ได้</b> ใช้ปุ่มคัดลอกแล้ววางลงไฟล์ .csv แทน</div>
+     <label class="label" for="csv-out">ข้อความ CSV</label>
+     <textarea class="csv" id="csv-out" readonly>${csvText()}</textarea>
+     <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn pri" data-act="copy">คัดลอก CSV</button></div>
+    </div>
+   </div>
+  </div>`;
+}
+function render(){
+  menu();
+  $('#app').innerHTML = ({login:vLogin,dashboard:vDashboard,quota:vQuota,hit3:vHit3,export:vExport})[view]();
+  fixLinks();
+  const eg=$('#exp-grid'); if(eg && innerWidth<860) eg.style.gridTemplateColumns='minmax(0,1fr)';
+}
+
+/* helpers */
+function modal(html){ $('#modal-root').innerHTML=`<div class="modal-bg" data-act="close-bg"><div class="modal fade" role="dialog" aria-modal="true">${html}</div></div>`; const b=$('#modal-root button'); if(b) b.focus(); }
+function closeModal(){ $('#modal-root').innerHTML=''; }
+let tt; function toast(t){ clearTimeout(tt); let el=$('.toast'); if(!el){el=document.createElement('div');el.className='toast';el.setAttribute('role','status');document.body.appendChild(el);} el.textContent=t; tt=setTimeout(()=>el.remove(),2200); }
+
+/* events */
+document.addEventListener('submit',e=>{
+  if(e.target.id!=='login-form') return;
+  e.preventDefault();
+  const u=$('#lu').value.trim(), p=$('#lp').value;
+  if(u===CREDS.u && p===CREDS.p){ authed=true; try{sessionStorage.setItem('rauth','1');}catch(_){} go('dashboard'); }
+  else { $('#lu').classList.add('err'); $('#lp').classList.add('err');
+    modal(`<div class="ic">!</div><h2>เข้าสู่ระบบไม่สำเร็จ</h2><p class="sub" style="margin:6px 0 18px">${u&&p?'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง':'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'}</p><button class="btn pri" style="width:100%" data-act="retry">กรอกใหม่</button>`); }
+});
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-act]'); if(!t) return;
+  const a=t.dataset.act;
+  if(a==='close-bg'){ if(e.target===t) closeModal(); return; }
+  if(a==='retry'){ closeModal(); $('#lp').value=''; $('#lp').focus(); return; }
+  if(a==='logout'){ authed=false; try{sessionStorage.removeItem('rauth');}catch(_){} go('login'); toast('ออกจากระบบแล้ว'); return; }
+  if(a==='reset'){ try{ localStorage.removeItem(STORE_KEY); }catch(_){} DATA=seed(); lastUpdate=new Date(); render(); toast('รีเซ็ตข้อมูลจำลองแล้ว (ล้างคำตอบจากฝั่งผู้ใช้ด้วย)'); return; }
+  if(a==='sim'){
+    const p=Object.keys(PROG).find(k=>byProg(k).length<QUOTA); if(!p) return;
+    const r=makeOne(p,true); DATA.push(r); lastUpdate=new Date(); render(); toast(`เพิ่มผู้ตอบ ${r.id} · ${SHORT[p]}`); return;
+  }
+  if(a==='copy'){
+    const txt=csvText();
+    try{ await navigator.clipboard.writeText(txt); toast(`คัดลอก CSV แล้ว (${filtered().length} แถว)`); }
+    catch(_){ const ta=$('#csv-out'); ta.focus(); ta.select(); toast('เลือกข้อความแล้ว กด Ctrl+C หรือ ⌘+C เพื่อคัดลอก'); }
+  }
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.col){ exp.cols[t.dataset.col]=t.checked; render(); }
+  if(t.id==='ex-prog'){ exp.prog=t.value; render(); }
+  if(t.id==='ex-complete'){ exp.complete=t.checked; render(); }
+});
+document.addEventListener('input',e=>{ if(e.target.id==='lu'||e.target.id==='lp') e.target.classList.remove('err'); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+try{ authed = sessionStorage.getItem('rauth')==='1'; }catch(_){}
+window.addEventListener('storage',e=>{ if(e.key===STORE_KEY){ DATA = seed().concat(loadLive()); lastUpdate=new Date(); render(); toast('มีคำตอบใหม่จากหน้าผู้ใช้'); } });
+window.addEventListener('focus',()=>{ const n=loadLive().length, have=DATA.filter(r=>r.live).length; if(n!==have){ DATA = seed().concat(loadLive()); lastUpdate=new Date(); render(); } });
+go(location.hash.slice(1)||'login',false);
+</script>
+
+</body>
+</html>
